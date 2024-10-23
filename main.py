@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation, PillowWriter
 import csv
 from models import Magnet, Coil, calculate_emf
 
@@ -107,4 +107,6 @@ total_frames = len(times)
 ani = FuncAnimation(fig, animate, frames=total_frames, interval=20, blit=True)
 
 plt.tight_layout()
-plt.show()
+# plt.show()
+plt.savefig('/home/yerlan/projects/Magnet/emf_graph.png')
+ani.save('magnet_animation.gif', writer=PillowWriter(fps=30))
