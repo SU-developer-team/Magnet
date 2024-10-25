@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation, PillowWriter
 import csv
 from models import Magnet, Coil, calculate_emf
 
@@ -17,11 +17,16 @@ def external_force(t, z, v):
     """
     k = 5.0  # Коэффициент жесткости пружины (Н/м)
     z_eq = 0  # Положение равновесия (м)
+    print(f"ex f {k * (z - z_eq)}")
     return -k * (z - z_eq)
 
 z0 = 0.05       # Начальное положение (м)
 v0 = 0          # Начальная скорость (м/с)
+<<<<<<< HEAD
 t_total = 1     # Общее время моделирования (с)
+=======
+t_total = 2     # Общее время моделирования (с)
+>>>>>>> 7f87c53cfa6ac5e8ef6489795be51e8ef4f37189
 time_step = 0.001  # Шаг по времени (с)
 
 # Расчет движения магнита
@@ -110,3 +115,5 @@ ani = FuncAnimation(fig, animate, frames=len(times), interval=20, blit=True)
 
 plt.tight_layout()
 plt.show()
+# plt.savefig('/home/yerlan/projects/Magnet/emf_graph.png')
+# ani.save('magnet_animation.gif', writer=PillowWriter(fps=30))
