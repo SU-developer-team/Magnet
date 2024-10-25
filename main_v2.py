@@ -11,16 +11,49 @@ def main():
         height=0.01  # Высота магнита (м) 10 мм
     )
 
+    # Магнитные силы от верхнего и нижнего магнита
+    z_top = 0.06
+    z_bottom = 0.01
+
     # Коэффициент демпфирования
-    damping_coefficient = 0.1
+    damping_coefficient = 0
+
+    def equation_shaker(t, y):
+        z, v = y  # Позиция и скорость 
+        F_gravity = -magnet.mass * G    
+        F_shaker = shaker_force(magnet, t)
+        a = F_shaker / magnet.mass 
+        return [v, a] 
+
+    def equation_top_m(t, y):
+        z, v = y  # Позиция и скорость 
+        if z < z_top:
+            F_top_magnetic = magnet.get_force(z - z_top)
+        else:
+            F_top_magnetic = 0 
+        F_gravity = -magnet.mass * G    
+        F_shaker = shaker_force(magnet, t)
+        # F_top_magnetic -= F_gravity 
+        F_top_magnetic = F_shaker
+        a = F_top_magnetic / magnet.mass
+        return [v, a] 
+     
+    def equation_bottom_m(t, y):
+        z, v = y  # Позиция и скорость 
+        if z < z_top:
+            F_bottom_magnetic = magnet.get_force(z - z_top)
+        else:
+            F_bottom_magnetic = 0 
+        F_gravity = -magnet.mass * G    
+        F_shaker = shaker_force(magnet, t)
+        F_bottom_magnetic -= F_gravity 
+        F_bottom_magnetic = F_shaker
+        a = F_bottom_magnetic / magnet.mass
+        return [v, a]
 
     # Определение функции для интегратора solve_ivp
     def equations(t, y):
-        z, v = y  # Позиция и скорость
-
-        # Магнитные силы от верхнего и нижнего магнита
-        z_top = 0.10
-        z_bottom = -0.10
+        z, v = y  # Позиция и скорость 
 
         # Сила от верхнего магнита (отталкивающая вниз)
         if z < z_top:
@@ -35,7 +68,7 @@ def main():
             F_bottom_magnetic = 0
 
         # Сила тяжести
-        F_gravity = -magnet.mass * G
+        F_gravity = magnet.mass * G
 
         # Сила шейкера
         F_shaker = shaker_force(magnet, t)
@@ -53,41 +86,50 @@ def main():
         return [v, a]
 
     # Задаем начальные условия [начальное положение, начальная скорость]
-    initial_conditions = [0, 0]  # Начальная позиция и скорость
-    time_total = 5
+    initial_conditions = [0.015, 0]  # Начальная позиция и скорость
+    initial_conditions_tm = [0.06, 0]  # Начальная позиция и скорость
+    initial_conditions_bm = [0.01, 0]  # Начальная позиция и скорость
+    initial_conditions_sk = [0.0, 0]  # Начальная позиция и скорость
+    time_total = 1
     # Временные точки, для которых нужно рассчитать значения
     t_span = (0, time_total)  # Моделируем в течение time_total секунд
-    t_eval = np.linspace(0, time_total, 1000)  # 1000 точек времени от 0 до time_total секунд
+    t_eval = np.linspace(0, time_total, 5000)  # 1000 точек времени от 0 до time_total секунд
 
     # Решаем уравнение с использованием solve_ivp
-    sol = solve_ivp(equations, t_span, initial_conditions, t_eval=t_eval, method='RK45')
+    sol_total = solve_ivp(equations, t_span, initial_conditions, t_eval=t_eval, method='RK45')
+    sol_top_m = solve_ivp(equation_top_m, t_span, initial_conditions_tm, t_eval=t_eval, method='RK45') 
+    sol_bottom_m = solve_ivp(equation_bottom_m, t_span, initial_conditions_bm, t_eval=t_eval, method='RK45') 
+    sol_shaker = solve_ivp(equation_shaker, t_span, initial_conditions_sk, t_eval=t_eval, method='RK45')
 
     # Печатаем результат решения
-    if sol.success:
+    if sol_total.success:
         print("Решение успешно найдено")
+        print("sol_total", sol_total)
     else:
-        print("Проблема с решением: ", sol.message)
+        print("Проблема с решением: ", sol_total.message)
 
     # Отображение результатов
     plt.figure(figsize=(10, 5))
 
-    # График положения во времени
-    plt.subplot(2, 1, 1)
-    plt.plot(sol.t, sol.y[0], label='Положение (z)', color='blue')
+    # График положения во времени 
+    plt.plot(sol_total.t, sol_total.y[0], label='Магнит (z)', color='blue')
+ 
+    # # Шейкер
+    plt.plot(sol_shaker.t, sol_shaker.y[0], label='(Шейкер) Положение (z)', color='green')
+
+    # # Верхний магнит
+    plt.plot(sol_top_m.t, sol_top_m.y[0], label='(Верхний магнит) Положение (z)', color='purple')
+
+    # # # Нижний магнит
+    plt.plot(sol_bottom_m.t, sol_bottom_m.y[0], label='(Нижний магнит) Положение (z)', color='orange')
+ 
     plt.xlabel('Время (с)')
     plt.ylabel('Положение (м)')
     plt.legend()
     plt.grid()
+    plt.show()
 
-    # График скорости во времени
-    plt.subplot(2, 1, 2)
-    plt.plot(sol.t, sol.y[1], label='Скорость (v)', color='red')
-    plt.xlabel('Время (с)')
-    plt.ylabel('Скорость (м/с)')
-    plt.legend()
-    plt.grid()
-
-    plt.tight_layout()
+    # plt.tight_layout()
     plt.show()
 
 if __name__ == '__main__':
