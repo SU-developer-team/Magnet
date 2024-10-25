@@ -7,7 +7,7 @@ from models import Magnet, Coil, calculate_emf
 
 # Создаем объекты магнита и катушки с новыми размерами
 magnet = Magnet(mass=0.043, diameter=0.008, height=0.01)  # Масса 43 г, диаметр 8 мм, высота 10 мм
-coil = Coil(turns=100, radius=0.01, position=0)  # Катушка в позиции z = 0
+coil = Coil(turns=50, radius=0.0004, position=0)  # Катушка в позиции z = 0
 
 # Параметры движения магнита
 def external_force(t, z, v):
@@ -21,7 +21,7 @@ def external_force(t, z, v):
 
 z0 = 0.05       # Начальное положение (м)
 v0 = 0          # Начальная скорость (м/с)
-t_total = 5     # Общее время моделирования (с)
+t_total = 1     # Общее время моделирования (с)
 time_step = 0.001  # Шаг по времени (с)
 
 # Расчет движения магнита
@@ -56,10 +56,10 @@ ax1.set_aspect('equal', adjustable='box')
 # Отображение катушки как пружины
 coil_length = 0.02  # Длина катушки (м)
 num_coil_turns = 12  # Количество витков катушки для отображения
-
+coil_diameter = 0.01 
 # Создаем массив точек для катушки
 z_coil = np.linspace(coil.position - coil_length / 2, coil.position + coil_length / 2, 1000)
-radius = coil.radius * 0.8  # Уменьшаем радиус для лучшего отображения
+radius = coil_diameter * 0.8  # Уменьшаем радиус для лучшего отображения
 
 x_coil = radius * np.sin(2 * np.pi * num_coil_turns * (z_coil - (coil.position - coil_length / 2)) / coil_length)
 
