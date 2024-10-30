@@ -1,35 +1,31 @@
 import math
 import numpy as np
 
-G = 9800 # ускорение свободного падения (м/с^2) г. Алматы
-X0 = 1 # амплитуда колебаний
-μ  = 1 # частота колебаний
+G = 9.8 # ускорение свободного падения (мм/с^2) г. Алматы
+X0 = 0.001 # амплитуда колебаний
+μ  = 10 # частота колебаний
 W = 2 * math.pi * μ 
 
-# a = 0.0005
-a = 78.614069
-# b = 1.92
-# a = 27
-b= 0.11
+
+# a = 7.8614069 
+a = 0.0118614069 
+# a = 2.7
+b = 0.12
 
 class Magnet:
     def __init__(self, diameter, height, mass):
         self.radius = diameter / 2
         self.height = height
         self.mass = mass
+        self.diameter = diameter
 
-    def get_force(self, z):
+    def get_force(self, z, F_shaker):
         """
         Расчет силы магнита в точке z по оси магнита.
-        """
-        k = 10
-        #return k*z
-        # return a * np.exp(-b * z)
-        # print( a / z ** 2)
-        return a / z
-        # return a / (self.radius**2 + z**2)**1.5
-    
-    # def 
+        """ 
+        return a / z + b + F_shaker
+ 
+        # return a*np.exp(z*b) + F_shaker
     
     def magnetic_induction(self, z):
         """
@@ -50,72 +46,93 @@ class Magnet:
 
 
 class Coil:
-    def __init__(self, turns, thickness, radius, position, magnet, wire_diameter=0.0005):
-        self.turns = turns
+    def __init__(self, turns_count, thickness, radius, position, magnet, wire_diameter=0.0005, layer_count=4):
+        self.turns_count = turns_count  # Общее число витков
         self.radius = radius
-        self.area = math.pi * radius**2
-        self.position = position  # Положение катушки по оси z 
+        self.position = position  # Базовое положение катушки по оси z
         self.magnet = magnet
-        self.thickness = thickness  # Толщина катушки (м)   
+        self.thickness = thickness  # Толщина катушки (м)
         self.wire_diameter = wire_diameter  # Диаметр провода (м)
+        self.layer_count = layer_count  # Количество слоев проводов (обмоток друг над другом)
 
-        # Вычисление числа слоёв
-        self.num_layers = max(1, int(self.thickness / self.wire_diameter))
-        # Число витков на слой
-        self.turns_per_layer = self.turns / self.num_layers
-        # Вычисление высоты катушки
-        self.height = self.turns * self.wire_diameter
+        # Расчет числа витков на слой
+        self.turns_per_layer = int(self.turns_count / self.layer_count)
+
+        # Проверка и корректировка общего числа витков
+        self.turns_count = self.turns_per_layer * self.layer_count
+
+        # Вычисление толщины катушки (с учетом слоев)
+        calculated_thickness = self.layer_count * self.wire_diameter
+        if calculated_thickness > self.thickness:
+            raise ValueError("Заданная толщина меньше, чем требуется для размещения заданного числа слоев.")
+
+        # Вычисление высоты катушки (длина вдоль оси z)
+        self.height = self.turns_per_layer * self.wire_diameter
+
+        # Создаем список для хранения информации о каждой витке
+        self.turns = []
+        self.initialize_turns()
+
+    def initialize_turns(self):
+        """
+        Инициализирует позиции и параметры каждой витки в катушке.
+        """
+        for layer in range(self.layer_count):
+            # Радиус каждого слоя увеличивается на диаметр провода
+            layer_radius = self.radius + layer * self.wire_diameter
+            for turn in range(self.turns_per_layer):
+                # Позиция каждой витки вдоль оси z (вертикальное расположение)
+                turn_z_position = self.position + turn * self.wire_diameter
+                self.turns.append({
+                    'layer': layer,
+                    'radius': layer_radius,
+                    'z_position': turn_z_position
+                })
 
     def coil_position(self, t):
         """
-        Возвращает положение катушки в момент времени t с учетом колебаний шейкера.
+        Возвращает базовое положение катушки в момент времени t с учетом колебаний шейкера.
         """
         return self.position + X0 * np.sin(W * t)
 
-    # def get_eds(self, magnet_position, magnet_velocity, t):
-    #     """
-    #     Рассчитывает ЭДС, индуцированную в катушке, в зависимости от положения и скорости магнита.
-    #     """
-    #     # Расстояние между магнитом и катушкой
-    #     distance = abs(magnet_position - self.coil_position(t))
+    def get_eds(self, magnet_position, magnet_velocity, t):
+        """
+        Рассчитывает ЭДС для каждой витки и возвращает список ЭДС витков и их суммарное значение.
+        """
+        total_eds = 0
+        eds_per_turn = []
 
-    #     # Простейшая модель магнитного поля, убывающего с расстоянием, например, B ~ 1/distance^2
-    #     B = 1 / distance**2 if distance > 0 else 0  # Избегаем деления на ноль
+        # Базовое положение катушки с учетом движения шейкера
+        coil_base_position = self.coil_position(t)
 
-    #     # Производная магнитного потока по времени для ЭДС
-    #     dPhi_dt = -self.turns * self.area * B * magnet_velocity
+        for turn in self.turns:
+            # Положение витки с учетом базового положения катушки
+            turn_position = coil_base_position + (turn['z_position'] - self.position)
 
-    #     return dPhi_dt
+            # Расстояние от магнита до витки
+            distance = magnet_position - turn_position
 
-    def get_eds_v1(self, magnet_position, magnet_velocity, t):
-        # Определяем расстояние от магнита до катушки
-        distance = magnet_position - self.coil_position(t)
+            # Магнитная индукция в точке витки
+            B = self.magnet.magnetic_induction(distance)
 
-        # Используем точный расчет магнитной индукции магнита
-        B = self.magnet.magnetic_induction(distance)
-
-        # Определение пространственной производной B по оси
-        delta = 1e-6  # Малое приращение для численной дифференциации
-        dB_dx = (self.magnet.magnetic_induction(distance + delta) - B) / delta
-
-        # Расчет ЭДС с учетом точного B и dB/dx
-        dPhi_dt = -self.turns * self.area * dB_dx * magnet_velocity
-        return dPhi_dt
-
-    def get_eds(self, z_m, v_m, t):
-        distance = z_m - self.coil_position(t)
-
-        # Проверка, находится ли магнит внутри катушки
-        if self.position <= z_m <= self.position + self.height:
-            # Расчёт магнитной индукции из класса Magnet
-            B = self.magnet.magnetic_induction(distance) 
-            # Расчёт ЭДС по закону Фарадея
+            # Численная производная магнитной индукции по оси z
             delta = 1e-6  # Малое приращение для численной дифференциации
-            dB_dx = (self.magnet.magnetic_induction(distance + delta) - B) / delta
-            eds = -self.turns * self.area * dB_dx * v_m
-            return eds
-        else:
-            return 0
+            B_plus = self.magnet.magnetic_induction(distance + delta)
+            dB_dx = (B_plus - B) / delta
+
+            # Площадь витки (можно учитывать изменение площади для каждого слоя)
+            turn_area = math.pi * turn['radius']**2
+
+            # Расчет ЭДС для витки
+            eds = -dB_dx * magnet_velocity * turn_area
+
+            # Добавляем ЭДС витки в список
+            eds_per_turn.append(eds)
+
+            # Суммируем ЭДС
+            total_eds += eds
+
+        return eds_per_turn, total_eds
 
 
 
