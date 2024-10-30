@@ -4,6 +4,28 @@ from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 import math
 import csv
+import logging
+
+# Set up logger
+logger = logging.getLogger('magnet_simulation')
+logger.setLevel(logging.DEBUG)
+
+# Create file handler which logs even debug messages
+fh = logging.FileHandler('/home/yerlan/projects/magnet/Magnet/logs/magnet_simulation.log')
+fh.setLevel(logging.DEBUG)
+
+# Create console handler with a higher log level
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+# Create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+
+# Add the handlers to the logger
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 results = []
 eds_forces = []
@@ -18,8 +40,8 @@ def main():
     )
 
     # Магнитные силы от верхнего и нижнего магнита
-    z_top = 6
-    z_bottom = 1
+    z_top = 0.06
+    z_bottom = 0.01
 
     coil = Coil(
         turns=52,                # Уменьшенное количество витков
@@ -54,16 +76,29 @@ def main():
 
         F_top_magnetic = magnet.get_force(abs(z_m - z_top)) if z_m < z_top else 0
         F_bottom_magnetic = magnet.get_force(abs(z_m - z_bottom)) if z_m > z_bottom else 0
-        
+         
         # Cd≈1.0 Ламинарный поток
         # Cd≈1.2  Турбулентный поток
         Cd = 1.2
         ro = 0.001225
         A = math.pi
-        F_damping = 0.5*ro*v_m**2 * Cd * A
+        F_damping = 0.5*ro*v_m**2 * Cd * A 
+        # Магниты всегда отталкивает
+        F_top_magnetic = F_top_magnetic if F_top_magnetic>0 else 0
+        F_bottom_magnetic = F_bottom_magnetic if F_bottom_magnetic>0 else 0
+ 
 
         # Общая сила с учётом ЭДС
+        
         F_total_magnet = -F_top_magnetic + F_bottom_magnetic - F_gravity + F_shaker + F_damping
+        logger.info(f"F total: {F_total_magnet}")
+        logger.info(f"F_top_magnetic: {-F_top_magnetic}")
+        logger.info(f"F_bottom_magnetic: {F_bottom_magnetic}")
+        logger.info(f"F_gravity: {-F_gravity}")
+        logger.info(f"F_shaker: {F_shaker}")
+        logger.info(f"F_damping: {F_damping}")
+        logger.info(f"Z {z_m}")
+        logger.info(f"Time {t}\n---------------------------------------------")
         
         # top magnet a
         a_tm = F_shaker / magnet.mass
@@ -93,7 +128,7 @@ def main():
 
     # Initial conditions for all objects: [z_m, v_m, z_tm, v_tm, z_bm, v_bm, z_sk, v_sk]
     initial_conditions = [0.025, 0, 0.06, 0, 0.01, 0, 0.0, 0]
-    time_total = 10
+    time_total = 5
     t_span = (0, time_total)
     t_eval = np.linspace(0, time_total, 1000)
 
@@ -150,14 +185,7 @@ def main():
     plt.grid()
 
     plt.tight_layout()
-    plt.show()
-    print('LEN eds_forces:', len(eds_forces))
-    print('sol_combined.t LEN:', len(sol_combined.t))
-
-
-
-
-
+    plt.show()  
 
 
 if __name__ == '__main__':
@@ -169,5 +197,7 @@ if __name__ == '__main__':
         writer.writeheader()
         for data in results:
             writer.writerow(data)
+
+    logger.info('----------------END----------------')
 
 
