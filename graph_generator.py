@@ -43,11 +43,21 @@ class GraphGenerator:
 
         # Чтение данных из CSV файла
         with open(csv_file_path, 'r') as csvfile:
+            # Определяем, есть ли заголовок
+            has_header = csv.Sniffer().has_header(csvfile.read(1024))
+            csvfile.seek(0)  # Возвращаемся в начало файла
             csvreader = csv.reader(csvfile)
+
+            if has_header:
+                next(csvreader)  # Пропускаем заголовок
+
             for row in csvreader:
-                if len(row) == 2:  # Проверка, что в строке два значения (X и Y)
-                    x_values.append(float(row[0]))
-                    y_values.append(float(row[1]))
+                if len(row) == 2:
+                    try:
+                        x_values.append(float(row[0]))
+                        y_values.append(float(row[1]))
+                    except ValueError:
+                        continue
 
         output_image_path = os.path.join(self.save_dir, f'{q}.png')
 
@@ -144,17 +154,32 @@ class GraphGenerator:
 
 # Пример использования:
 if __name__ == "__main__":
-    
+    # Создание графика для экспериментальных данных
     generator = GraphGenerator(
-        csv_dir='/home/yerlan/coordinates', 
-        save_dir='/home/yerlan/projects/amplitude_detect/graph', 
+        csv_dir='exp_csv/a1', 
+        save_dir='media/a1', 
         smooth=True)
     s_values, q_values = generator.get_draw_data(draw=False)
-    generator.plot_summary_graph(s_values, q_values, output_image_name='1mm.png')
+    # generator.plot_summary_graph(s_values, q_values, output_image_name='1mm.png')
 
     generator = GraphGenerator(
-        csv_dir='/home/yerlan/A=2MM', 
-        save_dir='/home/yerlan/projects/amplitude_detect/graph_2', 
+        csv_dir='exp_csv/a2', 
+        save_dir='media/a2', 
         smooth=True)
     s_values, q_values = generator.get_draw_data(draw=False)
-    generator.plot_summary_graph(s_values, q_values, output_image_name='2mm.png')
+    # generator.plot_summary_graph(s_values, q_values, output_image_name='2mm.png')
+
+    # Создание графика для теоритических данных
+    generator = GraphGenerator(
+        csv_dir='csv/a1', 
+        save_dir='media/teory_a1', 
+        smooth=True)
+    s_values, q_values = generator.get_draw_data(draw=False)
+    generator.plot_summary_graph(s_values, q_values, output_image_name='1mm_teory.png')
+
+    generator = GraphGenerator(
+        csv_dir='csv/a2', 
+        save_dir='media/teory_a2', 
+        smooth=True)
+    s_values, q_values = generator.get_draw_data(draw=False)
+    generator.plot_summary_graph(s_values, q_values, output_image_name='2mm_teory.png')

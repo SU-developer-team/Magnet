@@ -1,16 +1,6 @@
 import math
 import numpy as np
-
-G = 9.8 # ускорение свободного падения (мм/с^2) г. Алматы
-X0 = 0.001 # амплитуда колебаний
-μ  = 10 # частота колебаний
-W = 2 * math.pi * μ 
-
-
-# a = 7.8614069 
-a = 0.0118614069 
-# a = 2.7
-b = 0.12
+ 
 
 class Magnet:
     def __init__(self, diameter, height, mass):
@@ -18,21 +8,23 @@ class Magnet:
         self.height = height
         self.mass = mass
         self.diameter = diameter
+        
+        self.a = 7.8614069  
+        self.b = 0.12
 
     def get_force(self, z, F_shaker):
         """
         Расчет силы магнита в точке z по оси магнита.
         """ 
-        return a / z + b + F_shaker
- 
-        # return a*np.exp(z*b) + F_shaker
+        return self.a / z + self.b + F_shaker
+  
     
     def magnetic_induction(self, z):
         """
         Расчет магнитной индукции в точке z по оси магнита.
         z - расстояние от центра магнита вдоль оси.
         """
-        Br = 0.1  # Остаточная магнитная индукция магнита (Тл)
+        Br = 0.3  # Остаточная магнитная индукция магнита (Тл)
         R = self.radius
         L = self.height / 2
 
@@ -89,13 +81,13 @@ class Coil:
                     'z_position': turn_z_position
                 })
 
-    def coil_position(self, t):
+    def coil_position(self, shaker, t):
         """
         Возвращает базовое положение катушки в момент времени t с учетом колебаний шейкера.
         """
-        return self.position + X0 * np.sin(W * t)
+        return self.position + shaker.X0 * np.sin(shaker.W * t)
 
-    def get_eds(self, magnet_position, magnet_velocity, t):
+    def get_eds(self, shaker, magnet_position, magnet_velocity, t):
         """
         Рассчитывает ЭДС для каждой витки и возвращает список ЭДС витков и их суммарное значение.
         """
@@ -103,7 +95,7 @@ class Coil:
         eds_per_turn = []
 
         # Базовое положение катушки с учетом движения шейкера
-        coil_base_position = self.coil_position(t)
+        coil_base_position = self.coil_position(shaker, t)
 
         for turn in self.turns:
             # Положение витки с учетом базового положения катушки
@@ -135,10 +127,15 @@ class Coil:
         return eds_per_turn, total_eds
 
 
+class Shaker:
+    def __init__(self, G, miew, X0):
+        self.G = G,
+        self.miew = miew
+        self.X0 = X0
+        self.W = 2 * math.pi * miew 
 
-def shaker_force(magnet, t):
-    """
-    Расчет силы, действующей на магнит при вибрации.
-    """
-    
-    return -magnet.mass * W**2 * X0 * math.cos(W * t)
+    def get_force(self, magnet, t):
+        """
+        Расчет силы, действующей на магнит при вибрации.
+        """
+        return -magnet.mass * self.W**2 * self.X0 * math.cos(self.W * t)

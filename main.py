@@ -1,4 +1,4 @@
-from models.models_v2 import Magnet, shaker_force, G, Coil, μ
+from models.models_v2 import Magnet, Shaker, Coil
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
@@ -45,7 +45,15 @@ def main():
     # Позиция магнитов
     z_top = 0.06
     z_bottom = 0.01
-    
+    G = 9.8 # ускорение свободного падения (м/с^2) г. Алматы
+    X0 = 0.001 # амплитуда колебаний
+    μ  = 150 # частота колебаний 
+
+    shaker = Shaker(
+        G=9.8,
+        miew=μ,
+        X0=X0
+        )
 
     coil = Coil(
         turns_count=208,                # Уменьшенное количество витков
@@ -68,11 +76,11 @@ def main():
         F_gravity = magnet.mass * G
 
         # Силы
-        F_shaker = shaker_force(magnet, t)
+        F_shaker = shaker.get_force(magnet, t)
         a_sk = F_shaker / magnet.mass  # Ускорение шейкера
 
-        F_top_magnetic = magnet.get_force(abs(z_m+(magnet.height/2) - z_top), F_shaker) 
-        F_bottom_magnetic = magnet.get_force(abs(z_m+(magnet.height/2) - z_bottom), F_shaker)
+        F_top_magnetic = magnet.get_force(abs(z_m-(magnet.height/2) - z_top), F_shaker) 
+        F_bottom_magnetic = magnet.get_force(abs(z_m-(magnet.height/2) - z_bottom), F_shaker)
 
         # Коэффициент сопротивления 
         Cd = 1.2  # Турбулентный поток
@@ -109,7 +117,7 @@ def main():
 
     # Обратный вызов для записи значения ЭДС в моменты `t_eval`
     def save_eds_forces(z_m, v_m, t):
-        eds_per_turn, total_eds = coil.get_eds(z_m, v_m, t)
+        eds_per_turn, total_eds = coil.get_eds(shaker, z_m, v_m, t)
         # print('EDS:', eds)
         eds_forces.append(total_eds)
 
@@ -120,14 +128,11 @@ def main():
             'eds': total_eds
         })
 
-
-        
-
     # Initial conditions for all objects: [z_m, v_m, z_tm, v_tm, z_bm, v_bm, z_sk, v_sk]
     initial_conditions = [0.05, 0, 0.060, 0, 0.010, 0, 0.0, 0]
-    time_total = 1
+    time_total = 0.1
     t_span = (0, time_total)
-    t_eval = np.linspace(0, time_total, 500)
+    t_eval = np.linspace(0, time_total, 5000)
 
     # Solve the combined system with dense output
     sol_combined = solve_ivp(
@@ -169,19 +174,16 @@ def main():
     # ЭДС
     t_csv = []
     v_csv = []
-    with open('exp_csv/10.csv', 'r') as csvfile:
+    with open(f'exp_csv/a1/{μ}.csv', 'r') as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             t_csv.append(float(row[0]))
             v_csv.append(float(row[1]))
  
     t_csv_start = t_csv[0]
-    t_csv = [t - t_csv_start for t in t_csv]
-
-
+    t_csv = [(t - t_csv_start)/1000 for t in t_csv]
 
     plt.subplot(3, 1, 2)
-    # plt.plot(t_eval, eds_forces, label='Сила ЭДС', color='red', label=f"Количество витков: {coil.turns_count}\nКоличество витков на слой: {coil.turns_per_layer}\nКоличество слойев: {coil.layer_count}\nВысота катушки: {coil.height}")
     plt.plot(
     t_eval, eds_forces, 
         color='red', 
