@@ -17,13 +17,13 @@ def main():
     z_bottom = 0.01
 
     coil = Coil(
-        turns=1,
-        radius=0.05,
-        position=0.015
+        turns=200,
+        radius=0.0002,
+        position=0.02
     )
 
     # Коэффициент демпфирования
-    damping_coefficient = 0.05
+    damping_coefficient = 0.1
 
     # Коэффициент ЭДС
     eds_coefficient = 0.20
@@ -41,7 +41,7 @@ def main():
         F_shaker = shaker_force(magnet, t)
         
         # ЭДС сила
-        F_eds = -eds_coefficient * v_m
+        # F_eds = -eds_coefficient * v_m
 
         # Magnet acceleration
         a_sk = F_shaker / magnet.mass
@@ -52,7 +52,7 @@ def main():
         F_damping = -damping_coefficient * v_m
 
         # Общая сила с учётом ЭДС
-        F_total_magnet = -F_top_magnetic + F_bottom_magnetic - F_gravity + F_shaker + F_damping + F_eds
+        F_total_magnet = -F_top_magnetic + F_bottom_magnetic - F_gravity + F_shaker + F_damping
         
         # top magnet a
         a_tm = F_shaker / magnet.mass
@@ -70,10 +70,10 @@ def main():
         eds_forces.append(eds)
 
     # Initial conditions for all objects: [z_m, v_m, z_tm, v_tm, z_bm, v_bm, z_sk, v_sk]
-    initial_conditions = [0.015, 0, 0.06, 0, 0.01, 0, 0.0, 0]
-    time_total = 20
+    initial_conditions = [0.025, 0, 0.06, 0, 0.01, 0, 0.0, 0]
+    time_total = 2
     t_span = (0, time_total)
-    t_eval = np.linspace(0, time_total, 1000)
+    t_eval = np.linspace(0, time_total, 100000)
 
     # Solve the combined system with dense output
     sol_combined = solve_ivp(
@@ -111,11 +111,11 @@ def main():
     plt.legend()
     plt.grid()
 
-    # Сила ЭДС
+    # ЭДС
     plt.subplot(3, 1, 2)
     plt.plot(t_eval, eds_forces, label='Сила ЭДС', color='red')
     plt.xlabel('Время (с)')
-    plt.ylabel('Сила ЭДС (Н)')
+    plt.ylabel('ЭДС (V)')
     plt.legend()
     plt.grid()
 
