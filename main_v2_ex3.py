@@ -116,7 +116,7 @@ def main():
     plt.plot(t_eval, eds_forces, label='Сила ЭДС', color='red')
     plt.xlabel('Время (с)')
     plt.ylabel('ЭДС (V)')
-    plt.legend()
+    plt.legend() 
     plt.grid()
 
     # Скорость магнита
