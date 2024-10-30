@@ -1,4 +1,4 @@
-from models_v2 import Magnet, shaker_force, G, Coil
+from models.models_v2 import Magnet, shaker_force, G, Coil
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt

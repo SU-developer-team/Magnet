@@ -66,4 +66,4 @@ plt.grid(True)
 # plt.grid(True)
 
 plt.tight_layout()
-plt.savefig('/home/yerlan/projects/Magnet/graph_z_v_a.png')
+plt.savefig('/home/yerlan/projects/Magnet/media/graph_z_v_a.png')

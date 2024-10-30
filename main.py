@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 import csv
-from models import Magnet, Coil, calculate_emf
+from models.models import Magnet, Coil, calculate_emf
 
 # Создаем объекты магнита и катушки с новыми размерами
 magnet = Magnet(mass=0.043, diameter=0.008, height=0.01)  # Масса 43 г, диаметр 8 мм, высота 10 мм

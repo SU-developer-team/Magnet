@@ -1,4 +1,4 @@
-from models_v2 import Magnet, shaker_force, G, Coil, μ
+from models.models_v2 import Magnet, shaker_force, G, Coil, μ
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
@@ -55,7 +55,12 @@ def main():
         F_top_magnetic = magnet.get_force(abs(z_m - z_top)) if z_m < z_top else 0
         F_bottom_magnetic = magnet.get_force(abs(z_m - z_bottom)) if z_m > z_bottom else 0
         
-        F_damping = -damping_coefficient * v_m
+        # Cd≈1.0 Ламинарный поток
+        # Cd≈1.2  Турбулентный поток
+        Cd = 1.2
+        ro = 0.001225
+        A = math.pi
+        F_damping = 0.5*ro*v_m**2 * Cd * A
 
         # Общая сила с учётом ЭДС
         F_total_magnet = -F_top_magnetic + F_bottom_magnetic - F_gravity + F_shaker + F_damping
