@@ -1,0 +1,127 @@
+2024-10-30 19:33:03,168 - magnet_simulation - INFO - F total: -299.90356761904803
+2024-10-30 19:33:03,168 - magnet_simulation - INFO - F_top_magnetic: -523.235991886109
+2024-10-30 19:33:03,168 - magnet_simulation - INFO - F_bottom_magnetic: 223.753824267061
+2024-10-30 19:33:03,168 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,168 - magnet_simulation - INFO - F_shaker: -0.9778014472247248
+2024-10-30 19:33:03,168 - magnet_simulation - INFO - F_damping: 0.0
+2024-10-30 19:33:03,168 - magnet_simulation - INFO - Z 0.05
+2024-10-30 19:33:03,168 - magnet_simulation - INFO - Time 0.0
+---------------------------------------------
+2024-10-30 19:33:03,168 - magnet_simulation - INFO - F total: -299.9035676191702
+2024-10-30 19:33:03,191 - magnet_simulation - INFO - F_top_magnetic: -523.2359918862362
+2024-10-30 19:33:03,191 - magnet_simulation - INFO - F_bottom_magnetic: 223.75382426718826
+2024-10-30 19:33:03,191 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,191 - magnet_simulation - INFO - F_shaker: -0.9778014470974373
+2024-10-30 19:33:03,191 - magnet_simulation - INFO - F_damping: 1.2225196758336338e-10
+2024-10-30 19:33:03,191 - magnet_simulation - INFO - Z 0.05
+2024-10-30 19:33:03,191 - magnet_simulation - INFO - Time 1.070019101745654e-07
+---------------------------------------------
+2024-10-30 19:33:03,192 - magnet_simulation - INFO - F total: -299.9035676679488
+2024-10-30 19:33:03,192 - magnet_simulation - INFO - F_top_magnetic: -523.235991937024
+2024-10-30 19:33:03,192 - magnet_simulation - INFO - F_bottom_magnetic: 223.753824317976
+2024-10-30 19:33:03,192 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,192 - magnet_simulation - INFO - F_shaker: -0.9778013963097013
+2024-10-30 19:33:03,193 - magnet_simulation - INFO - F_damping: 4.8900787033345355e-08
+2024-10-30 19:33:03,193 - magnet_simulation - INFO - Z 0.05
+2024-10-30 19:33:03,193 - magnet_simulation - INFO - Time 2.1400382034913084e-06
+---------------------------------------------
+2024-10-30 19:33:03,193 - magnet_simulation - INFO - F total: -299.90208159629736
+2024-10-30 19:33:03,193 - magnet_simulation - INFO - F_top_magnetic: -523.2347364753674
+2024-10-30 19:33:03,193 - magnet_simulation - INFO - F_bottom_magnetic: 223.7540549890968
+2024-10-30 19:33:03,193 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,193 - magnet_simulation - INFO - F_shaker: -0.9778013326659231
+2024-10-30 19:33:03,193 - magnet_simulation - INFO - F_damping: 1.1002677085193765e-07
+2024-10-30 19:33:03,194 - magnet_simulation - INFO - Z 0.04999996406573621
+2024-10-30 19:33:03,194 - magnet_simulation - INFO - Time 3.210057305236962e-06
+---------------------------------------------
+2024-10-30 19:33:03,194 - magnet_simulation - INFO - F total: -299.8930004665309
+2024-10-30 19:33:03,194 - magnet_simulation - INFO - F_top_magnetic: -523.2270646515361
+2024-10-30 19:33:03,194 - magnet_simulation - INFO - F_bottom_magnetic: 223.75546496738338
+2024-10-30 19:33:03,194 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,194 - magnet_simulation - INFO - F_shaker: -0.9778006325844538
+2024-10-30 19:33:03,194 - magnet_simulation - INFO - F_damping: 7.823781307810387e-07
+2024-10-30 19:33:03,194 - magnet_simulation - INFO - Z 0.04999974446745734
+2024-10-30 19:33:03,194 - magnet_simulation - INFO - Time 8.560152813965233e-06
+---------------------------------------------
+2024-10-30 19:33:03,195 - magnet_simulation - INFO - F total: -299.89052162307
+2024-10-30 19:33:03,195 - magnet_simulation - INFO - F_top_magnetic: -523.2249705099516
+2024-10-30 19:33:03,195 - magnet_simulation - INFO - F_bottom_magnetic: 223.75584985273957
+2024-10-30 19:33:03,195 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,195 - magnet_simulation - INFO - F_shaker: -0.977800441496028
+2024-10-30 19:33:03,195 - magnet_simulation - INFO - F_damping: 9.658579566795384e-07
+2024-10-30 19:33:03,195 - magnet_simulation - INFO - Z 0.04999968452363357
+2024-10-30 19:33:03,195 - magnet_simulation - INFO - Time 9.511280904405814e-06
+---------------------------------------------
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F total: -299.8870563812037
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_top_magnetic: -523.2220430593544
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_bottom_magnetic: 223.7563879005676
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_shaker: -0.9778001743494008
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_damping: 1.2224168785133153e-06
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Z 0.04999960072592536
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Time 1.0700191017456541e-05
+---------------------------------------------
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F total: -299.8870567179163
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_top_magnetic: -523.2220433437662
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_bottom_magnetic: 223.75638784832472
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_shaker: -0.9778001743494008
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_damping: 1.222474805949195e-06
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Z 0.0499996007340659
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Time 1.0700191017456541e-05
+---------------------------------------------
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F total: -299.83194804990296
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_top_magnetic: -523.175488958238
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_bottom_magnetic: 223.76494961712822
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_shaker: -0.9777923789789418
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_damping: 8.708793114558148e-06
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Z 0.04999826789638354
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Time 2.8560152813965232e-05
+---------------------------------------------
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F total: -299.70093541414315
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_top_magnetic: -523.0648179612667
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_bottom_magnetic: 223.78529755027546
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_shaker: -0.9777858216599971
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_damping: 1.5003151878266526e-05
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Z 0.04999509881185205
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Time 3.749013371221958e-05
+---------------------------------------------
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F total: -298.9321404279501
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_top_magnetic: -522.4156031131868
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_bottom_magnetic: 223.9049344814916
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_shaker: -0.9777264393002078
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_damping: 7.179625497649776e-05
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Z 0.04997648082556926
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Time 8.214003820349131e-05
+---------------------------------------------
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F total: -298.7351176801187
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_top_magnetic: -522.2492835883954
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_bottom_magnetic: 223.93565201618424
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_shaker: -0.9777112419872053
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_damping: 8.610790749512945e-05
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Z 0.04997170372850957
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Time 9.00777990019396e-05
+---------------------------------------------
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F total: -298.46402925744604
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_top_magnetic: -522.0204788010755
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_bottom_magnetic: 223.97795566371377
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_shaker: -0.9776902754162756
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_damping: 0.00010612008433199761
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Z 0.049965126936003405
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Time 9.999999999999999e-05
+---------------------------------------------
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F total: -298.46520293133807
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_top_magnetic: -522.0214690647023
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_bottom_magnetic: 223.97777256766835
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_gravity: -0.4214
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_shaker: -0.9776902754162756
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - F_damping: 0.00010643430416196389
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Z 0.04996515541005456
+2024-10-30 19:33:03,196 - magnet_simulation - INFO - Time 9.999999999999999e-05
+---------------------------------------------
+2024-10-30 19:33:11,796 - magnet_simulation - INFO - ----------------END----------------

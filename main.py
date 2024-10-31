@@ -47,7 +47,8 @@ def main():
     z_bottom = 0.01
     G = 9.8 # ускорение свободного падения (м/с^2) г. Алматы
     X0 = 0.001 # амплитуда колебаний
-    μ  = 150 # частота колебаний 
+    μ  = 64 # частота колебаний 
+    time_total = 0.1
 
     shaker = Shaker(
         G=9.8,
@@ -130,7 +131,6 @@ def main():
 
     # Initial conditions for all objects: [z_m, v_m, z_tm, v_tm, z_bm, v_bm, z_sk, v_sk]
     initial_conditions = [0.05, 0, 0.060, 0, 0.010, 0, 0.0, 0]
-    time_total = 0.1
     t_span = (0, time_total)
     t_eval = np.linspace(0, time_total, 5000)
 
@@ -182,7 +182,7 @@ def main():
  
     t_csv_start = t_csv[0]
     t_csv = [(t - t_csv_start)/1000 for t in t_csv]
-
+    t_csv.sort()
     plt.subplot(3, 1, 2)
     plt.plot(
     t_eval, eds_forces, 
@@ -219,13 +219,6 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
-    with open(f'csv/{μ}.csv', mode='w', newline='') as csv_file:
-        fieldnames = ['t', 'z_m', 'v_m', 'eds']
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-
-        writer.writeheader()
-        for data in results:
-            writer.writerow(data)
+    main() 
 
     logger.info('----------------END----------------')

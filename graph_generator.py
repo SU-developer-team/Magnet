@@ -160,14 +160,14 @@ if __name__ == "__main__":
         save_dir='media/a1', 
         smooth=True)
     s_values, q_values = generator.get_draw_data(draw=False)
-    # generator.plot_summary_graph(s_values, q_values, output_image_name='1mm.png')
+    generator.plot_summary_graph(s_values, q_values, output_image_name='1mm.png')
 
     generator = GraphGenerator(
         csv_dir='exp_csv/a2', 
         save_dir='media/a2', 
         smooth=True)
     s_values, q_values = generator.get_draw_data(draw=False)
-    # generator.plot_summary_graph(s_values, q_values, output_image_name='2mm.png')
+    generator.plot_summary_graph(s_values, q_values, output_image_name='2mm.png')
 
     # Создание графика для теоритических данных
     generator = GraphGenerator(
