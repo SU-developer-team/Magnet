@@ -47,8 +47,8 @@ def main():
     z_bottom = 0.01
     G = 9.8 # ускорение свободного падения (м/с^2) г. Алматы
     X0 = 0.001 # амплитуда колебаний
-    μ  = 64 # частота колебаний 
-    time_total = 0.1
+    μ  = 58 # частота колебаний 
+    time_total = 2 # время моделирования
 
     shaker = Shaker(
         G=9.8,
@@ -182,6 +182,7 @@ def main():
  
     t_csv_start = t_csv[0]
     t_csv = [(t - t_csv_start)/1000 for t in t_csv]
+    v_csv = [v/10 for v in v_csv]
     t_csv.sort()
     plt.subplot(3, 1, 2)
     plt.plot(

@@ -9,13 +9,25 @@ class Magnet:
         self.mass = mass
         self.diameter = diameter
         
-        self.a = 7.8614069  
-        self.b = 0.12
+        # self.a = 7.8614069  
+        self.a = 0.007861  
+        self.b = -0.121755
 
-    def get_force(self, z, F_shaker):
+    def get_force(self, x, F_shaker):
         """
         Расчет силы магнита в точке z по оси магнита.
         """ 
+        mu_0 = 4 * np.pi * 1e-7  # Магнитная проницаемость вакуума 
+        Br = 0.648371 # Тл
+        b = 0.704375
+
+        term1 = (2 * (self.height + x)) / np.sqrt((self.height + x)**2 + self.radius**2)
+        term2 = (2 * self.height + x) / np.sqrt((2 * self.height + x)**2 + self.radius**2)
+        term3 = x / np.sqrt(x**2 + self.radius**2)
+        
+        force = (np.pi * Br**2 * self.radius**2) / (2 * mu_0) * (term1 - term2 - term3) + b
+        return force + F_shaker
+
         return self.a / z + self.b + F_shaker
   
     

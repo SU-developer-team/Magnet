@@ -15,7 +15,7 @@ def smooth_data(data, window_size=5):
     return uniform_filter1d(data, size=window_size)
 
 class GraphGenerator:
-    def __init__(self, csv_dir, save_dir, smooth=True):
+    def __init__(self, csv_dir, save_dir, smooth=True, divide=1):
         """
         Инициализация объекта для генерации графиков.
         
@@ -26,6 +26,7 @@ class GraphGenerator:
         self.csv_dir = csv_dir
         self.save_dir = save_dir
         self.smooth = smooth
+        self.divide = divide
 
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
@@ -70,7 +71,8 @@ class GraphGenerator:
         else:
             y_values_smoothed = y_values
             x_values_smoothed = x_values
-
+        y_values_smoothed = [y / self.divide for y in y_values_smoothed]
+        x_values_smoothed = [x / self.divide for x in x_values_smoothed]
         center = sum(y_values_smoothed) / len(y_values_smoothed)
         y_values_smoothed = [center - y for y in y_values_smoothed]
         if draw:
@@ -151,21 +153,22 @@ class GraphGenerator:
 
         print(f"Итоговый график сохранён как {output_image_name}")
 
-
-# Пример использования:
+ 
 if __name__ == "__main__":
     # Создание графика для экспериментальных данных
     generator = GraphGenerator(
         csv_dir='exp_csv/a1', 
         save_dir='media/a1', 
-        smooth=True)
+        smooth=True,
+        divide=1000)
     s_values, q_values = generator.get_draw_data(draw=False)
     generator.plot_summary_graph(s_values, q_values, output_image_name='1mm.png')
 
     generator = GraphGenerator(
         csv_dir='exp_csv/a2', 
         save_dir='media/a2', 
-        smooth=True)
+        smooth=True,
+        divide=1000)
     s_values, q_values = generator.get_draw_data(draw=False)
     generator.plot_summary_graph(s_values, q_values, output_image_name='2mm.png')
 
