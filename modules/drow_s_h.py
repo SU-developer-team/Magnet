@@ -16,7 +16,7 @@ plt.ylabel('s (Среднеквадратическое значение ЭДС)
 plt.xticks(np.arange(0.04, 0.91, 0.05))
 plt.legend()
 plt.grid(True)
-
+plt.savefig('s_z.png')
 # Сохранение и отображение графика
 # plt.savefig('plot_output.png')  # Сохранить график как PNG файл
 plt.show()                       # Показать график на экране

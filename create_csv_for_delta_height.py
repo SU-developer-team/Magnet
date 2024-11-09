@@ -37,7 +37,7 @@ def calculate_f_air(z_m, v_m, magnet, z_top, z_bottom):
     Расчет силы вязкого трения воздуха в зазоре между магнитом и цилиндром.
     """
     # Диаметры внутреннего цилиндра и магнита
-    D_outer = 0.0196  # Диаметр внутренней стенки цилиндра (м)
+    D_outer = 0.0205  # Диаметр внутренней стенки цилиндра (м)
     D_inner = magnet.diameter  # Диаметр магнита (м)
 
     # Зазор между магнитом и цилиндром
@@ -183,7 +183,7 @@ def get_s(z_top):
     return math.sqrt(sum([y**2 for y in eds_forces]) / len(eds_forces))
 
 if __name__ == '__main__': 
-    top_magnet_positions = np.arange(0.04, 0.90, 0.01)
+    top_magnet_positions = np.arange(0.04, 0.95, 0.01)
     z_values = []
     s_values = []
 
@@ -198,5 +198,5 @@ if __name__ == '__main__':
         'z': z_values,
         's': s_values
     })
-    data.to_csv('z_h1.csv', index=False)
+    data.to_csv('z_h.csv', index=False)
     print("Данные успешно записаны в z_h.csv")

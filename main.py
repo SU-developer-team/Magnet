@@ -13,27 +13,27 @@ if not os.path.exists('logs'):
 
 # Настройка логгера
 logger = logging.getLogger('magnet_simulation')
-logger.setLevel(logging.DEBUG)
-timestamp = datetime.now().strftime('%d.%m.%Y-%H-%M-%S')
+# logger.setLevel(logging.DEBUG)
+# timestamp = datetime.now().strftime('%d.%m.%Y-%H-%M-%S')
 
-# Создаем обработчик для логирования в файл
-fh = logging.FileHandler(f'logs/{timestamp}.log')
-fh.setLevel(logging.DEBUG)
+# # Создаем обработчик для логирования в файл
+# fh = logging.FileHandler(f'logs/{timestamp}.log')
+# fh.setLevel(logging.DEBUG)
 
-# Создаем обработчик для вывода логов в консоль
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
+# # Создаем обработчик для вывода логов в консоль
+# ch = logging.StreamHandler()
+# ch.setLevel(logging.INFO)
 
-# Настройка форматирования логов
-formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-fh.setFormatter(formatter)
-ch.setFormatter(formatter)
+# # Настройка форматирования логов
+# formatter = logging.Formatter(
+#     '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+# )
+# fh.setFormatter(formatter)
+# ch.setFormatter(formatter)
 
-# Добавляем обработчики к логгеру
-logger.addHandler(fh)
-logger.addHandler(ch)
+# # Добавляем обработчики к логгеру
+# logger.addHandler(fh)
+# logger.addHandler(ch)
 
 results = []
 eds_forces = []
@@ -57,7 +57,7 @@ def calculate_f_air(z_m, v_m, magnet, z_top, z_bottom):
     Расчет силы вязкого трения воздуха в зазоре между магнитом и цилиндром.
     """
     # Диаметры внутреннего цилиндра и магнита
-    D_outer = 0.0196  # Диаметр внутренней стенки цилиндра (м)
+    D_outer = 0.0205  # Диаметр внутренней стенки цилиндра (м)
     D_inner = magnet.diameter  # Диаметр магнита (м)
 
     # Зазор между магнитом и цилиндром
@@ -164,7 +164,7 @@ def main():
     G = 9.8  # Ускорение свободного падения (м/с^2)
     X0 = 0.001  # Амплитуда колебаний
     μ = 50     # Частота колебаний
-    time_total = 2  # Время моделирования
+    time_total = 10  # Время моделирования
     magnet_start_z = 0.03
     shaker = Shaker(
         G=G,
@@ -185,7 +185,7 @@ def main():
     # Начальные условия: [z_m, v_m, z_tm, v_tm, z_bm, v_bm, z_sk, v_sk]
     initial_conditions = [magnet_start_z, 0, z_top, 0, z_bottom, 0, 0.0, 0]
     t_span = (0, time_total)
-    t_eval = np.linspace(0, time_total, 10000)
+    t_eval = np.linspace(0, time_total, 5000)
 
     # Решение системы уравнений
     # Решение системы уравнений
