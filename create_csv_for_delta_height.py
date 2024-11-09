@@ -7,7 +7,8 @@ import csv
 from datetime import datetime 
 import os
 import re
- 
+import pandas as pd
+
 results = []
 eds_forces = [] 
 csv_dir = "exp_csv/a2"
@@ -115,7 +116,7 @@ def save_eds_forces(z_m, v_m, t, a, shaker, coil):
         }
     )
 
-def create_csv(z_top):
+def get_s(z_top):
     # Создание объекта магнита
     magnet = Magnet(
         diameter=0.0195,  # Диаметр магнита 19.5 мм
@@ -123,7 +124,8 @@ def create_csv(z_top):
         height=0.01,      # Высота магнита 10 мм
     )
 
-    # Позиция магнитов 
+    # Позиция магнитов
+    # z_top = z_top
     z_bottom = 0.01
     G = 9.8  # Ускорение свободного падения (м/с^2)
     X0 = 0.001  # Амплитуда колебаний
@@ -169,6 +171,8 @@ def create_csv(z_top):
     # Получаем значения решения на точках `t_eval`
     solution_values = sol_combined.sol(t_eval)
     a_values = np.gradient(solution_values[1], sol_combined.t)  # Используем градиент для численного дифференцирования
+
+    # Рассчитываем ЭДС на каждом шаге
     for i, t in enumerate(t_eval):
         z_m = solution_values[0, i]
         v_m = solution_values[1, i]
@@ -176,19 +180,23 @@ def create_csv(z_top):
 
         save_eds_forces(z_m, v_m, t, a_m, shaker, coil)
 
- 
+    return math.sqrt(sum([y**2 for y in eds_forces]) / len(eds_forces))
 
 if __name__ == '__main__': 
-    top_magnet_positions = np.arange(0.04, 0.3, 0.01)
-
+    top_magnet_positions = np.arange(0.04, 0.90, 0.01)
+    z_values = []
+    s_values = []
 
     for z in top_magnet_positions:
-        print(f"Creating for top magnet position z={z}")
-        create_csv(int(z))
-        with open(f'csv/delta_height/{z}.csv', mode='w', newline='') as csv_file:
-            fieldnames = ['t', 'eds']
-            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        z = round(z, 2)
+        s = get_s(z)
+        s_values.append(s)
+        z_values.append(z)
+        print(f"Расчёт среднеквадратического значения ЭДС для высоты верхнего магнита z={z} окончен! s={s}")
 
-            writer.writeheader()
-            for data in results:
-                writer.writerow(data) 
+    data = pd.DataFrame({
+        'z': z_values,
+        's': s_values
+    })
+    data.to_csv('z_h1.csv', index=False)
+    print("Данные успешно записаны в z_h.csv")

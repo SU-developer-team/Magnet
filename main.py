@@ -13,27 +13,27 @@ if not os.path.exists('logs'):
 
 # Настройка логгера
 logger = logging.getLogger('magnet_simulation')
-# logger.setLevel(logging.DEBUG)
-# timestamp = datetime.now().strftime('%d.%m.%Y-%H-%M-%S')
+logger.setLevel(logging.DEBUG)
+timestamp = datetime.now().strftime('%d.%m.%Y-%H-%M-%S')
 
-# # Создаем обработчик для логирования в файл
-# fh = logging.FileHandler(f'logs/{timestamp}.log')
-# fh.setLevel(logging.DEBUG)
+# Создаем обработчик для логирования в файл
+fh = logging.FileHandler(f'logs/{timestamp}.log')
+fh.setLevel(logging.DEBUG)
 
-# # Создаем обработчик для вывода логов в консоль
-# ch = logging.StreamHandler()
-# ch.setLevel(logging.INFO)
+# Создаем обработчик для вывода логов в консоль
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
 
-# # Настройка форматирования логов
-# formatter = logging.Formatter(
-#     '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-# )
-# fh.setFormatter(formatter)
-# ch.setFormatter(formatter)
+# Настройка форматирования логов
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
 
-# # Добавляем обработчики к логгеру
-# logger.addHandler(fh)
-# logger.addHandler(ch)
+# Добавляем обработчики к логгеру
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 results = []
 eds_forces = []
@@ -159,7 +159,7 @@ def main():
     )
 
     # Позиция магнитов
-    z_top = 0.23
+    z_top = 0.07
     z_bottom = 0.01
     G = 9.8  # Ускорение свободного падения (м/с^2)
     X0 = 0.001  # Амплитуда колебаний
@@ -284,10 +284,7 @@ def main():
     plt.grid()
 
     plt.tight_layout()
-    # plt.show()
-    print("turns_per_layer", coil.turns_per_layer)
-    print(math.sqrt(sum([y**2 for y in eds_forces]) / len(eds_forces))
-)
+    plt.show() 
 
 if __name__ == '__main__':
     main()
