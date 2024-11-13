@@ -8,10 +8,7 @@ class Magnet:
         self.height = height
         self.mass = mass
         self.diameter = diameter
-<<<<<<< HEAD
-=======
         self.square = self.radius**2
->>>>>>> origin/main
         
         # self.a = 7.8614069  
         self.a = 0.007861  
@@ -25,24 +22,12 @@ class Magnet:
         Br = 0.648371 # Тл
         b = 0.704375
 
-<<<<<<< HEAD
-        term1 = (2 * (self.height + x)) / np.sqrt((self.height + x)**2 + self.radius**2)
-        term2 = (2 * self.height + x) / np.sqrt((2 * self.height + x)**2 + self.radius**2)
-        term3 = x / np.sqrt(x**2 + self.radius**2)
-        
-        force = (np.pi * Br**2 * self.radius**2) / (2 * mu_0) * (term1 - term2 - term3) + b
-        return force + F_shaker
-
-        return self.a / z + self.b + F_shaker
-  
-=======
         term1 = (2 * (self.height + x)) / np.sqrt((self.height + x)**2 + self.square)
         term2 = (2 * self.height + x) / np.sqrt((2 * self.height + x)**2 + self.square)
         term3 = x / np.sqrt(x**2 + self.square)
         
         force = (np.pi * Br**2 * self.square) / (2 * mu_0) * (term1 - term2 - term3)
         return force
->>>>>>> origin/main
     
     def magnetic_induction(self, z):
         """
@@ -112,11 +97,7 @@ class Coil:
         """
         return self.position + shaker.X0 * np.sin(shaker.W * t)
 
-<<<<<<< HEAD
-    def get_eds(self, shaker, magnet_position, magnet_velocity, t):
-=======
     def get_eds(self, shaker, magnet_position, magnet_velocity, t, a_m):
->>>>>>> origin/main
         """
         Рассчитывает ЭДС для каждой витки и возвращает список ЭДС витков и их суммарное значение.
         """

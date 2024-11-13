@@ -1,5 +1,5 @@
 import math
-import numpy as np
+import numpy as np 
 
 
 class Magnet:
@@ -41,6 +41,18 @@ class Magnet:
             - (z - self.height / 2)
             / math.sqrt(self.radius ** 2 + (z - self.height / 2) ** 2)
         )
+    
+    def magnetic_induction_derivative(self, z):
+        """
+        Производная  магнитной индукции в точке z по оси магнита
+        z - расстояние от центра магнита вдоль оси.
+        """
+        r2 = self.radius ** 2
+        term1 = r2 / (r2 + (z + self.height / 2) ** 2) ** (3 / 2)
+        term2 = r2 / (r2 + (z - self.height / 2) ** 2) ** (3 / 2)
+        
+        dB_dz = (self.br / 2) * (term1 - term2)
+        return dB_dz
 
 
 class Coil:
@@ -106,7 +118,7 @@ class Coil:
         """
         return self.position + shaker.X0 * np.sin(shaker.W * t)
 
-    def get_eds(self, shaker, magnet_position, magnet_velocity, t, a_m):
+    def get_total_emf(self, shaker, magnet_position, magnet_velocity, t, a_m):
         """
         Рассчитывает ЭДС для каждой витки и возвращает список ЭДС витков и их суммарное значение.
         """
@@ -129,13 +141,15 @@ class Coil:
             # Численная производная магнитной индукции по оси z
             delta = 1e-6  # Малое приращение для численной дифференциации
             B_plus = self.magnet.magnetic_induction(distance + delta)
-            dB_dx = (B_plus - B) / delta
+            # dB_dx = (B_plus - B) / delta
+            dB_dx = self.magnet.magnetic_induction_derivative(distance + delta)
 
             # Площадь витки (можно учитывать изменение площади для каждого слоя)
             turn_area = math.pi * turn['radius'] ** 2
 
             # Расчет ЭДС для витки
             eds = -dB_dx * magnet_velocity * turn_area
+            
 
             # Добавляем ЭДС витки в список
             eds_per_turn.append(eds)
@@ -145,6 +159,23 @@ class Coil:
 
         return eds_per_turn, total_eds
 
+    def calculate_inductance(self):
+        """
+        Расчет индуктивности катушки.
+        """
+        mu_0 = 4 * math.pi * 1e-7  # Магнитная проницаемость вакуума
+        A = math.pi * self.radius ** 2  # Площадь поперечного сечения
+        L = (mu_0 * self.turns_count ** 2 * A) / self.height
+        return L
+
+    def get_self_induction_emf(self, delta_current, delta_time):
+        """
+        Вычисляет ЭДС самоиндукции на основе индуктивности и скорости изменения тока.
+        """
+        L = self.calculate_inductance()  # Индуктивность катушки
+        dI_dt = delta_current / delta_time  # Скорость изменения тока
+        emf_self_induction = -L * dI_dt  # ЭДС самоиндукции
+        return emf_self_induction
 
 class Shaker:
     def __init__(self, G, miew, X0):

@@ -105,7 +105,7 @@ def save_eds_forces(z_m, v_m, t, a, shaker, coil):
     """
     Функция для сохранения значений ЭДС и результатов.
     """
-    eds_per_turn, total_eds = coil.get_eds(shaker, z_m, v_m, t, a)
+    eds_per_turn, total_eds = coil.get_total_emf(shaker, z_m, v_m, t, a)
     eds_forces.append(total_eds)
 
     results.append(
