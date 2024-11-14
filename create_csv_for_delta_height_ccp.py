@@ -9,7 +9,7 @@ import os
 import re
 import pandas as pd
  
-for μ in range(1, 101, 1): 
+for μ in range(5, 301, 5): 
     print(f"===== Расчёт для μ={μ} =====")
     results = []
     eds_forces = [] 
@@ -121,8 +121,8 @@ for μ in range(1, 101, 1):
         z_bottom = 0.01
         G = 9.8  # Ускорение свободного падения (м/с^2)
         X0 = 0.001  # Амплитуда колебаний
-        time_total = 2  # Время моделирования
-        magnet_start_z = 0.04
+        time_total = 5  # Время моделирования
+        magnet_start_z = 0.05
         shaker = Shaker(
             G=G,
             miew=μ,
@@ -196,7 +196,7 @@ for μ in range(1, 101, 1):
         return s
 
     if __name__ == '__main__':  
-        top_magnet_positions = np.arange(0.05, 0.20, 0.005)
+        top_magnet_positions = np.arange(0.07, 0.20, 0.01)
         z_values = []
         s_values = []
 
@@ -211,7 +211,7 @@ for μ in range(1, 101, 1):
             'z': z_values,
             's': s_values
         })
-        data.to_csv(f'z_s_center_coil_position1/csv/s_z__{μ}.csv', index=False)
+        data.to_csv(f'z_s_center_coil_position2_mzs_0.05/csv/s_z__{μ}.csv', index=False)
         print(f"Данные успешно записаны в z_h__{μ}.csv")
         
         plt.figure(figsize=(20, 6))
@@ -219,8 +219,8 @@ for μ in range(1, 101, 1):
         plt.title('Зависимость s от z')
         plt.xlabel('z (Высота верхнего магнита)')
         plt.ylabel('s (Среднеквадратическое значение ЭДС)')
-        plt.xticks(np.arange(0.05, 0.17, 0.01))
+        plt.xticks(np.arange(0.07, 0.15, 0.01))
         plt.legend()
         plt.grid(True)
-        plt.savefig(f'z_s_center_coil_position1/png/s_z__{μ}.png')
+        plt.savefig(f'z_s_center_coil_position2_mzs_0.05/png/s_z__{μ}.png')
         # plt.show()                       # Показать график на экране
