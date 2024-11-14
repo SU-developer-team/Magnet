@@ -97,7 +97,7 @@ class Coil:
         """
         return self.position + shaker.X0 * np.sin(shaker.W * t)
 
-    def get_total_emf(self, shaker, magnet_position, magnet_velocity, t, a_m):
+    def get_eds(self, shaker, magnet_position, magnet_velocity, t, a_m):
         """
         Рассчитывает ЭДС для каждой витки и возвращает список ЭДС витков и их суммарное значение.
         """
@@ -135,6 +135,13 @@ class Coil:
             # R = 1.5
             # eds = (magnet_velocity - L*a_m/R)  * turn_area * dB_dx / distance**2
             eds_per_turn.append(eds)
+            
+            # Новая версия формулы
+            # B0 = 0.0000000000000001
+            # L = 1.2
+            # a = magnet_velocity / t
+            # R = 1.5
+            # eds = (magnet_velocity - L*a/R)  * turn_area * B0 / distance**2
 
             # Суммируем ЭДС
             total_eds += eds

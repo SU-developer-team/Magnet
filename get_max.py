@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Укажите директорию, где находятся ваши CSV файлы
-csv_dir = 'z_s_center_coil_position/csv/'
+csv_dir = 'z_s_center_coil_position1/csv/'
 
 # Используем glob для получения списка всех CSV файлов, соответствующих шаблону
 csv_files = glob.glob(os.path.join(csv_dir, 's_z__*.csv'))
@@ -64,13 +64,14 @@ for df in data_list:
     print(f"μ = {μ}, s({z_target}) = {s_value}")
 
 # Построение графика s от μ при z = z_target
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(15, 6))
 plt.plot(mu_values, s_values_at_z_target, marker='o', linestyle='-')
 plt.title(f'Зависимость s от μ при z = {z_target}')
 plt.xlabel('μ (Частота)')
 plt.ylabel(f's (Среднеквадратическое значение ЭДС при z = {z_target})')
 plt.grid(True)
-plt.xticks(np.arange(0, 105, 5))
+plt.yticks(np.arange(0, 0.08, 0.01))
+plt.xticks(np.arange(0, 80, 5))
 plt.tight_layout()
 plt.savefig(f's_vs_mu_at_z_{z_target}.png')  # Сохранение графика в файл
 plt.show()

@@ -137,13 +137,13 @@ def main():
     )
 
     # Позиция магнитов
-    z_top = 0.2
+    z_top = 0.09
     z_bottom = 0.01
     G = 9.8  # Ускорение свободного падения (м/с^2)
     X0 = 0.001  # Амплитуда колебаний
-    μ = 5     # Частота колебаний
-    time_total = 2  # Время моделирования
-    magnet_start_z = 0.025
+    μ = 10     # Частота колебаний
+    time_total = 5  # Время моделирования
+    magnet_start_z = 0.0425
     shaker = Shaker(
         G=G,
         miew=μ,
@@ -283,6 +283,7 @@ def main():
     plt.savefig(f'saved_h_{z_top}_{μ}.png')
     plt.show() 
 
-if __name__ == '__main__':
-    main()
-    # logger.info('----------------END----------------')
+if __name__ == '__main__': 
+    main() 
+
+    logger.info('----------------END----------------') 
