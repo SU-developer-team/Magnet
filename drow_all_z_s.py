@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Укажите директорию, где находятся ваши CSV файлы
-csv_dir = 'z_s_center_coil_position/csv/'
+csv_dir = 'z_s/csv/'
 
 # Используем glob для получения списка всех CSV файлов, соответствующих шаблону
 csv_files = glob.glob(os.path.join(csv_dir, 's_z__*.csv'))
@@ -52,5 +52,5 @@ plt.ylabel('s (Среднеквадратическое значение ЭДС)
 plt.legend(title='μ (Частота)', loc='best')
 plt.grid(True)
 plt.tight_layout()
-plt.savefig('z_vs_s_for_different_mu.png')  # Сохранение графика в файл
+plt.savefig('z_vs_s_for_different_mu_coil_pos_const.png')  # Сохранение графика в файл
 plt.show()

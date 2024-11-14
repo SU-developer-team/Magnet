@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Укажите директорию, где находятся ваши CSV файлы
-csv_dir = 'z_s_center_coil_position/csv/'
+csv_dir = 'z_s_center_coil_position1/csv/'
 
 # Используем glob для получения списка всех CSV файлов, соответствующих шаблону
 csv_files = glob.glob(os.path.join(csv_dir, 's_z__*.csv'))
