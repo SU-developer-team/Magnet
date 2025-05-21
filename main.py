@@ -1,155 +1,276 @@
-from models import Magnet, Shaker, Coil
+# magnet_simulation_refactored.py
+"""
+Симуляция движения магнита в системе с шейкером и катушкой, разбитая на
+отдельные функции для удобства сопровождения и тестирования.
+
+Запускайте скрипт напрямую, чтобы получить графики и PNG-файл с результатами.
+Все основные параметры собраны в main(), так что их легко менять без рытья в
+глубине кода.
+"""
+from __future__ import annotations
+
+import os
+import logging
+from datetime import datetime
+from pathlib import Path
+import math
+from typing import Tuple, Dict, Any
+
 import numpy as np
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
-import math
-import logging
-from datetime import datetime
-import os
 
-# Проверка и создание директории для логов
-if not os.path.exists('logs'):
-    os.makedirs('logs')
+from models import Magnet, Shaker, Coil  # локальные модели пользователя
 
-# Настройка логгера
-logger = logging.getLogger('magnet_simulation')
-# logger.setLevel(logging.DEBUG)
-# timestamp = datetime.now().strftime('%d.%m.%Y-%H-%M-%S')
+################################################################################
+# ЛОГГИРОВАНИЕ
+################################################################################
 
-# # Создаем обработчик для логирования в файл
-# fh = logging.FileHandler(f'logs/{timestamp}.log')
-# fh.setLevel(logging.DEBUG)
 
-# # Создаем обработчик для вывода логов в консоль
-# ch = logging.StreamHandler()
-# ch.setLevel(logging.INFO)
+def configure_logger(name: str = "magnet_simulation",
+                     log_dir: str | Path = "logs",
+                     level_file: int = logging.DEBUG,
+                     level_console: int = logging.INFO) -> logging.Logger:
+    """Гибкая настройка логгера с выводом в файл и консоль."""
+    log_dir = Path(log_dir)
+    log_dir.mkdir(exist_ok=True)
 
-# # Настройка форматирования логов
-# formatter = logging.Formatter(
-#     '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-# )
-# fh.setFormatter(formatter)
-# ch.setFormatter(formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(min(level_file, level_console))
 
-# # Добавляем обработчики к логгеру
-# logger.addHandler(fh)
-# logger.addHandler(ch)
+    # Формат лог-сообщений
+    fmt = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
 
-def get_magnet_position(shaker, t):
+    # Файл
+    ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    fh = logging.FileHandler(log_dir / f"{ts}.log")
+    fh.setLevel(level_file)
+    fh.setFormatter(fmt)
+    logger.addHandler(fh)
+
+    # Консоль
+    ch = logging.StreamHandler()
+    ch.setLevel(level_console)
+    ch.setFormatter(fmt)
+    logger.addHandler(ch)
+
+    return logger
+
+
+################################################################################
+# ФИЗИКА
+################################################################################
+
+
+def get_magnet_position(shaker: Shaker, t: float) -> float:
+    """Положение шейкера во времени (синус)."""
     return shaker.X0 * np.sin(shaker.W * t)
 
-def calculate_f_damping(v_m, magnet):
-    """
-    Расчет силы демпфирования (сопротивления воздуха).
-    """
-    Cd = 1.2  # Коэффициент лобового сопротивления (для турбулентного потока)
-    ro = 1.225  # Плотность воздуха (кг/м^3)
-    A = math.pi * magnet.diameter ** 2 * 0.25  # Площадь поперечного сечения магнита
-    F_damping = 0.5 * ro * v_m ** 2 * Cd * np.sign(v_m)
-    return F_damping
+
+def calculate_f_damping(v_m: float, magnet: Magnet) -> float:
+    """Сила аэродинамического сопротивления турбулентного потока."""
+    Cd = 1.2              # лобовое сопротивление
+    rho = 1.225           # плотность воздуха, кг/м³
+    area = math.pi * (magnet.diameter * 0.5) ** 2
+    return 0.5 * rho * v_m ** 2 * Cd * np.sign(v_m)
 
 
-def calculate_f_air(z_m, v_m, magnet, z_top, z_bottom):
-    """
-    Расчет силы вязкого трения воздуха в зазоре между магнитом и цилиндром.
-    """
-    # Диаметры внутреннего цилиндра и магнита
-    D_outer = 0.0205  # Диаметр внутренней стенки цилиндра (м)
-    D_inner = magnet.diameter  # Диаметр магнита (м)
-
-    # Зазор между магнитом и цилиндром
-    gap = (D_outer - D_inner) / 2  # Радиальный зазор (м)
-
+def calculate_f_air(v_m: float, magnet: Magnet, gap: float) -> float:
+    """Вязкое трение в кольцевом зазоре между магнитом и цилиндром."""
     if gap <= 0:
         raise ValueError("Диаметр магнита должен быть меньше диаметра цилиндра.")
-
-    # Параметры воздуха
-    mu_air = 1.81e-5  # Динамическая вязкость воздуха (Па·с)
-
-    # Сила вязкого трения для потока в кольцевом зазоре:
-    F_viscous = -6 * np.pi * mu_air * magnet.height * v_m / gap
-    # Сила вязкого трения для цилиндра в цилиндре:
-    # ln_ratio = np.log(D_outer / D_inner)
-    # F_viscous = - (4 * np.pi * mu_air * magnet.height * v_m) / ln_ratio
-
-    return F_viscous
+    mu_air = 1.81e-5  # Па·с
+    return -6 * math.pi * mu_air * magnet.height * v_m / gap
 
 
-def combined_equations(t, y, magnet, shaker, z_top, z_bottom, coil, resistance):
-    """
-    Система дифференциальных уравнений для расчета движения магнита и тока в катушке.
-    """
-    z_m, v_m, z_tm, v_tm, z_bm, v_bm, z_sk, v_sk, i = y  # Добавили ток i в переменные состояния
+################################################################################
+# ДИФФЕРЕНЦИАЛЬНАЯ СИСТЕМА
+################################################################################
 
-    # Константы и параметры
+
+def combined_equations(
+    t: float,
+    y: np.ndarray,
+    magnet: Magnet,
+    shaker: Shaker,
+    z_top: float,
+    z_bottom: float,
+    coil: Coil,
+    resistance: float,
+    gap: float,
+) -> list[float]:
+    """Правая часть ОДУ для solve_ivp."""
+    (
+        z_m, v_m,
+        z_tm, v_tm,
+        z_bm, v_bm,
+        z_sk, v_sk,
+        i,
+    ) = y
+
+    # --- Силы ---
     F_gravity = magnet.mass * shaker.G
-
-    # Силы
     F_shaker = shaker.get_force(magnet, t)
-    a_sk = F_shaker / magnet.mass  # Ускорение шейкера
+    a_sk = F_shaker / magnet.mass
 
-    F_top_magnetic = magnet.get_force(
-        abs(z_m - (magnet.height / 2) - z_top) + get_magnet_position(shaker, t)
-    )
-    F_bottom_magnetic = magnet.get_force(
-        abs(z_m - (magnet.height / 2) - z_bottom) + get_magnet_position(shaker, t)
-    )
+    top_offset = abs(z_m - magnet.height * 0.5 - z_top)
+    bot_offset = abs(z_m - magnet.height * 0.5 - z_bottom)
+    F_top_mag = magnet.get_force(top_offset + get_magnet_position(shaker, t))
+    F_bot_mag = magnet.get_force(bot_offset + get_magnet_position(shaker, t))
 
-    # Расчет силы демпфирования
     F_damping = calculate_f_damping(v_m, magnet)
+    F_viscous = calculate_f_air(v_m, magnet, gap)
 
-    # Расчет силы от вязкого трения воздуха
-    F_viscous = calculate_f_air(z_m, v_m, magnet, z_top, z_bottom)
+    F_total = -F_top_mag + F_bot_mag - F_gravity - F_damping + F_viscous
+    a_m = F_total / magnet.mass
 
-    # Общая сила на магнит
-    F_total_magnet = (
-        - F_top_magnetic
-        + F_bottom_magnetic
-        - F_gravity
-        - F_damping 
-        + F_viscous
-    )
+    # Для верхнего и нижнего магнитов берём то же a_sk (упрощение)
+    a_tm = a_bm = a_sk
 
-    # Вычисление ускорений
-    a_m = F_total_magnet / magnet.mass  # Ускорение магнита
-    a_tm = F_shaker / magnet.mass       # Ускорение верхнего магнита
-    a_bm = F_shaker / magnet.mass       # Ускорение нижнего магнита
-
-    # Расчет ЭДС
+    # --- Электрика ---
     eds_per_turn, total_eds = coil.get_total_emf(shaker, z_m, v_m, t, a_m)
+    L = coil.calculate_inductance()
+    di_dt = (total_eds - resistance * i) / L
 
-    # Индуктивность катушки
-    inductance = coil.calculate_inductance()
-
-    # Дифференциальное уравнение для тока в катушке
-    di_dt = (total_eds - resistance * i) / inductance
-
-    # Возврат производных переменных состояния
     return [v_m, a_m, v_tm, a_tm, v_bm, a_bm, v_sk, a_sk, di_dt]
 
 
-def main():
-    # Создание объекта магнита
-    magnet = Magnet(
-        diameter=0.0195,  # Диаметр магнита 19.5 мм
-        mass=0.043,       # Масса магнита 43 г
-        height=0.01,      # Высота магнита 10 мм
+################################################################################
+# СИМУЛЯЦИЯ
+################################################################################
+
+
+def run_simulation(
+    magnet: Magnet,
+    shaker: Shaker,
+    coil: Coil,
+    *,
+    z_top: float,
+    z_bottom: float,
+    magnet_start_z: float,
+    gap: float,
+    resistance: float = 0.1,
+    sim_time: float = 5.0,
+    points: int = 5000,
+) -> Dict[str, Any]:
+    """Запускает solve_ivp и возвращает результаты в словари."""
+    y0 = [magnet_start_z, 0, z_top, 0, z_bottom, 0, 0.0, 0, 0]
+    t_eval = np.linspace(0, sim_time, points)
+
+    sol = solve_ivp(
+        combined_equations,
+        (0, sim_time),
+        y0,
+        args=(magnet, shaker, z_top, z_bottom, coil, resistance, gap),
+        t_eval=t_eval,
+        method="RK45",
+        rtol=1e-6,
+        atol=1e-6,
     )
 
-    # Позиция магнитов
-    z_top = 0.09
-    z_bottom = 0.01
-    G = 9.8  # Ускорение свободного падения (м/с^2)
-    X0 = 0.001  # Амплитуда колебаний
-    μ = 10     # Частота колебаний
-    time_total = 5  # Время моделирования
-    magnet_start_z = 0.0425
-    shaker = Shaker(
-        G=G,
-        miew=μ,
-        X0=X0,
-    )
+    # Пост-обработка: ускорение, ЭДС, самоиндукция
+    v_m = sol.y[1]
+    a_m = np.gradient(v_m, sol.t)
 
+    total_eds = []
+    for t, z_m, v in zip(sol.t, sol.y[0], v_m):
+        _, e = coil.get_total_emf(shaker, z_m, v, t, np.nan)  # a_m не нужен для ЭДС в модели пользователя
+        total_eds.append(e)
+    total_eds = np.asarray(total_eds)
+
+    L = coil.calculate_inductance()
+    emf_self = -L * np.gradient(sol.y[8], sol.t)
+
+    return {
+        "t": sol.t,
+        "z_m": sol.y[0],
+        "v_m": v_m,
+        "i": sol.y[8],
+        "eds_external": total_eds,
+        "eds_self": emf_self,
+        "eds_total": total_eds + emf_self,
+    }
+
+
+################################################################################
+# ВИЗУАЛИЗАЦИЯ
+################################################################################
+
+
+def plot_results(results: Dict[str, np.ndarray], coil: Coil,
+                 z_top: float, mu: float, save_dir: str | Path = ".") -> None:
+    """Строит четыре графика и сохраняет PNG."""
+    save_dir = Path(save_dir)
+    save_dir.mkdir(exist_ok=True)
+
+    t = results["t"]
+    fig, axes = plt.subplots(4, 1, figsize=(12, 12), sharex=True)
+
+    # 1. Положение
+    axes[0].plot(t, results["z_m"], label="Магнит (z)")
+    axes[0].axhline(coil.position, color="red", linestyle="--", label="Катушка нижняя")
+    axes[0].axhline(coil.position + coil.height, color="red", linestyle="--", label="Катушка верхняя")
+    axes[0].set_ylabel("Положение (м)")
+    axes[0].legend(); axes[0].grid(True)
+
+    # 2. Итоговая ЭДС
+    axes[1].plot(t, results["eds_total"], color="red")
+    axes[1].set_ylabel("Итоговая ЭДС (В)"); axes[1].grid(True)
+
+    # 3. Внешняя + самоиндукция
+    axes[2].plot(t, results["eds_external"], label="Внешняя ЭДС")
+    axes[2].plot(t, results["eds_self"], label="Самоиндукция")
+    axes[2].set_ylabel("ЭДС (В)")
+    axes[2].legend(); axes[2].grid(True)
+
+    # 4. Ток
+    axes[3].plot(t, results["i"], color="orange")
+    axes[3].set_xlabel("Время (с)"); axes[3].set_ylabel("Ток (А)"); axes[3].grid(True)
+
+    fig.tight_layout()
+    out = save_dir / f"sim_{z_top}_{mu}.png"
+    fig.savefig(out)
+    plt.show()
+
+def plot_emf(res: Dict[str, np.ndarray], *, z_top: float, mu: float, output: Path | str = ".") -> None:
+    """Simplified visualization: only external EMF vs. self‑induction on a single panel (English labels)."""
+    output = Path(output); output.mkdir(exist_ok=True)
+    t = res["t"]
+    fig, ax = plt.subplots(1, 1, figsize=(10, 8), sharex=True)
+
+    # External EMF and self‑induction with different styles / markers
+    ax.plot(t, res["eds_external"], label="External EMF", linestyle="-", marker="o", markevery=10)
+    ax.plot(t, res["eds_self"],     label="Self‑induction EMF", linestyle="--", marker="s", markevery=10)
+
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("EMF (V)")
+    ax.legend(); ax.grid(True)
+
+    fig.tight_layout(); fig.savefig(Path(output) / f"emf_{z_top}_{mu}.png"); plt.show()
+
+
+################################################################################
+# MAIN
+################################################################################
+
+
+def main() -> None:
+    """Точка входа: задаём параметры, запускаем симуляцию и строим графики."""
+    logger = configure_logger()
+    logger.info("Запуск симуляции…")
+
+    # --- Параметры системы ---
+    magnet = Magnet(diameter=0.0195, mass=0.043, height=0.01)
+    z_top, z_bottom = 0.09, 0.01
+    gap = (0.0205 - magnet.diameter) / 2  # м
+
+    G = 9.8
+    X0 = 0.001
+    mu = 5   # частота колебаний, Гц
+    magnet_start_z = 0.045
+    sim_time = 5.0
+
+    shaker = Shaker(G=G, miew=mu, X0=X0)
     coil = Coil(
         turns_count=208,
         thickness=0.01025,
@@ -160,130 +281,23 @@ def main():
         layer_count=4,
     )
 
-    resistance = 0.1  # Сопротивление катушки
-
-    # Начальные условия: [z_m, v_m, z_tm, v_tm, z_bm, v_bm, z_sk, v_sk, i]
-    initial_conditions = [magnet_start_z, 0, z_top, 0, z_bottom, 0, 0.0, 0, 0]  # Добавили ток i = 0
-    t_span = (0, time_total)
-    t_eval = np.linspace(0, time_total, 5000)
-
-    # Решение системы уравнений
-    sol_combined = solve_ivp(
-        combined_equations,
-        t_span,
-        initial_conditions,
-        args=(magnet, shaker, z_top, z_bottom, coil, resistance),
-        t_eval=t_eval,
-        method='RK45',
-        rtol=1e-6,
-        atol=1e-6,
+    # --- Считаем ---
+    results = run_simulation(
+        magnet, shaker, coil,
+        z_top=z_top,
+        z_bottom=z_bottom,
+        magnet_start_z=magnet_start_z,
+        gap=gap,
+        resistance=0.1,
+        sim_time=sim_time,
     )
 
-    # Получаем значения решения на точках `t_eval`
-    solution_values = sol_combined.y
+    # --- Графики ---
+    plot_emf(results, z_top=z_top, mu=mu)
+    plot_results(results, coil, z_top, mu)
 
-    # Достаем значения переменных
-    z_m_values = solution_values[0]
-    v_m_values = solution_values[1]
-    i_values = solution_values[8]  # Ток в катушке
+    logger.info("Симуляция завершена.")
 
-    # Рассчитываем ускорение магнита
-    a_m_values = np.gradient(v_m_values, sol_combined.t)
 
-    # Рассчитываем ЭДС на каждом шаге
-    total_eds_values = []
-    for i in range(len(t_eval)):
-        t = t_eval[i]
-        z_m = z_m_values[i]
-        v_m = v_m_values[i]
-        a_m = a_m_values[i]
-        eds_per_turn, total_eds = coil.get_total_emf(shaker, z_m, v_m, t, a_m)
-        total_eds_values.append(total_eds)
-
-    total_eds_values = np.array(total_eds_values)
-
-    # Рассчитываем ЭДС самоиндукции на каждом шаге
-    inductance = coil.calculate_inductance()
-    emf_self_induction = -inductance * np.gradient(i_values, sol_combined.t)
-
-    # Итоговая ЭДС с учетом самоиндукции
-    total_emf_with_self_induction = total_eds_values + emf_self_induction
-
-    # Построение графиков
-    plt.figure(figsize=(12, 12))
-
-    # Положение магнита и шейкера
-    plt.subplot(4, 1, 1)
-    plt.plot(sol_combined.t, sol_combined.y[0], label='Магнит (z)', color='blue')
-    plt.plot(sol_combined.t, sol_combined.y[6], label='Шейкер (z)', color='green')
-    plt.plot(sol_combined.t, sol_combined.y[2], label='Верхний магнит (z)', color='purple')
-    plt.plot(sol_combined.t, sol_combined.y[4], label='Нижний магнит (z)', color='orange')
-    plt.plot(
-        sol_combined.t,
-        [coil.position for _ in sol_combined.t],
-        label='Катушка нижняя граница',
-        color='red',
-    )
-    plt.plot(
-        sol_combined.t,
-        [(coil.position + coil.height) for _ in sol_combined.t],
-        label='Катушка верхняя граница',
-        color='red',
-    )
-    plt.xlabel('Время (с)')
-    plt.ylabel('Положение (м)')
-    plt.legend()
-    plt.grid()
-
-    # ЭДС
-    plt.subplot(4, 1, 2)
-    plt.plot(
-        sol_combined.t,
-        total_emf_with_self_induction,
-        color='red',
-        label='Итоговая ЭДС с учетом самоиндукции',
-    )
-    plt.xlabel('Время (с)')
-    plt.ylabel('ЭДС (В)')
-    plt.legend()
-    plt.grid()
-
-    # Внешняя ЭДС и ЭДС самоиндукции
-    plt.subplot(4, 1, 3)
-    plt.plot(
-        sol_combined.t,
-        total_eds_values,
-        label='Внешняя ЭДС (total_eds)',
-        color='blue',
-    )
-    plt.plot(
-        sol_combined.t,
-        emf_self_induction,
-        label='ЭДС самоиндукции (self_emf)',
-        color='green',
-    )
-    plt.xlabel('Время (с)')
-    plt.ylabel('ЭДС (В)')
-    plt.legend()
-    plt.grid()
-
-    # Ток в катушке
-    plt.subplot(4, 1, 4)
-    plt.plot(
-        sol_combined.t,
-        i_values,
-        label='Ток в катушке (i)',
-        color='orange',
-    )
-    plt.xlabel('Время (с)')
-    plt.ylabel('Ток (А)')
-    plt.legend()
-    plt.grid()
-    plt.tight_layout()
-    plt.savefig(f'saved_h_{z_top}_{μ}.png')
-    plt.show() 
-
-if __name__ == '__main__': 
-    main() 
-
-    logger.info('----------------END----------------') 
+if __name__ == "__main__":
+    main()

@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Укажите директорию, где находятся ваши CSV файлы
-csv_dir = 'z_s_center_coil_position2_mzs_0.0425/csv/'
+csv_dir = 'z_s_center_coil_position2_mzs_0.05/csv/'
 
 # Используем glob для получения списка всех CSV файлов, соответствующих шаблону
 csv_files = glob.glob(os.path.join(csv_dir, 's_z__*.csv'))
@@ -71,7 +71,7 @@ plt.xlabel('μ (Частота)')
 plt.ylabel(f's (Среднеквадратическое значение ЭДС при z = {z_target})')
 plt.grid(True)
 plt.yticks(np.arange(0, 0.08, 0.01))
-plt.xticks(np.arange(0, 20, 1))
+plt.xticks(np.arange(0, 200, 5))
 plt.tight_layout()
 plt.savefig(f's_vs_mu_at_z_{z_target}.png')  # Сохранение графика в файл
 plt.show()

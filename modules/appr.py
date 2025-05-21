@@ -14,7 +14,7 @@ def magnetic_field(x, Br, b):
     return (Br / (2 * mu_0)) * (term1 - term2) + b
 
 def plot_data_with_magnetic_field_approximation():
-    csv_file = 'data.csv'
+    csv_file = r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\data.csv'
     h_values = []
     avg_values = []
 

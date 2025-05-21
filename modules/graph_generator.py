@@ -8,7 +8,7 @@ import re
 
 
 def extract_number(file_name):
-    numbers = re.findall(r'\d+', file_name)
+    numbers = re.findall(r'/d+', file_name)
     return int(numbers[0]) if numbers else float('inf')  # Default to infinity if no number is found
 
 def smooth_data(data, window_size=5):
@@ -157,7 +157,7 @@ class GraphGenerator:
 if __name__ == "__main__":
     # Создание графика для экспериментальных данных
     generator = GraphGenerator(
-        csv_dir='exp_csv/a1', 
+        csv_dir='D:/PROJECTs/leaves_detection/magnet/Magnet_clean/exp_csv/a1', 
         save_dir='media/a1', 
         smooth=True,
         divide=1000)
@@ -165,24 +165,24 @@ if __name__ == "__main__":
     generator.plot_summary_graph(s_values, q_values, output_image_name='1mm.png')
 
     generator = GraphGenerator(
-        csv_dir='exp_csv/a2', 
+        csv_dir='D:/PROJECTs/leaves_detection/magnet/Magnet_clean/exp_csv/a2', 
         save_dir='media/a2', 
         smooth=True,
         divide=1000)
     s_values, q_values = generator.get_draw_data(draw=False)
     generator.plot_summary_graph(s_values, q_values, output_image_name='2mm.png')
 
-    # Создание графика для теоритических данных
-    generator = GraphGenerator(
-        csv_dir='csv/a1', 
-        save_dir='media/teory_a1', 
-        smooth=True)
-    s_values, q_values = generator.get_draw_data(draw=False)
-    generator.plot_summary_graph(s_values, q_values, output_image_name='1mm_teory.png')
+    # # Создание графика для теоритических данных
+    # generator = GraphGenerator(
+    #     csv_dir='csv/a1', 
+    #     save_dir='media/teory_a1', 
+    #     smooth=True)
+    # s_values, q_values = generator.get_draw_data(draw=False)
+    # generator.plot_summary_graph(s_values, q_values, output_image_name='1mm_teory.png')
 
-    generator = GraphGenerator(
-        csv_dir='csv/a2', 
-        save_dir='media/teory_a2', 
-        smooth=True)
-    s_values, q_values = generator.get_draw_data(draw=False)
-    generator.plot_summary_graph(s_values, q_values, output_image_name='2mm_teory.png')
+    # generator = GraphGenerator(
+    #     csv_dir='csv/a2', 
+    #     save_dir='media/teory_a2', 
+    #     smooth=True)
+    # s_values, q_values = generator.get_draw_data(draw=False)
+    # generator.plot_summary_graph(s_values, q_values, output_image_name='2mm_teory.png')

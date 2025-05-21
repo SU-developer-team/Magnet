@@ -11,25 +11,55 @@ class Magnet:
         self.square = self.radius ** 2
         self.br = 0.648371  # Остаточная магнитная индукция магнита (Тл)
 
-    def get_force(self, x):
+    def get_force(self, x: float) -> float:
         """
-        Расчет силы взаимодействия между магнитами по оси z.
+        Улучшенная формула силы взаимодействия между магнитами по Фурлани с поправкой.
+        Используется выражение:
+            F(x) = (π * Br^2 * R^4) / (4 * μ0) * [1 / x_c^2 + 1 / (2L + x_c)^2 - 2 / (L + x_c)^2]
+        где x_c = x + 4R/5
         """
-        mu_0 = 4 * np.pi * 1e-7  # Магнитная проницаемость вакуума
+        mu_0 = 4 * math.pi * 1e-7  # магнитная постоянная, Гн/м
+        R = self.radius            # радиус магнита
+        L = self.height            # длина магнита
+        Br = self.br               # остаточная индукция
+        c = (4 * R) / 5            # поправка по Zurek
+        x_c = x + c
 
-        term1 = (2 * (self.height + x)) / np.sqrt((self.height + x) ** 2 + self.square)
-        term2 = (2 * self.height + x) / np.sqrt(
-            (2 * self.height + x) ** 2 + self.square
-        )
-        term3 = x / np.sqrt(x ** 2 + self.square)
+        term1 = 1 / (x_c ** 2)
+        term2 = 1 / ((2 * L + x_c) ** 2)
+        term3 = 2 / ((L + x_c) ** 2)
 
-        force = (
-            (np.pi * self.br ** 2 * self.square)
-            / (2 * mu_0)
-            * (term1 - term2 - term3)
-        )
+        force = (math.pi * Br ** 2 * R ** 4) / (4 * mu_0) * (term1 + term2 - term3)
         return force
 
+
+    # def get_force(self, x):
+    #     D = 0.525  # мм (диаметр витка)
+    #     d = 0.075  # мм (диаметр проволоки)
+    #     G = 80e6  # мПа (модуль сдвига для стали)
+    #     # G = 44e9  # Па (модуль сдвига для титана)
+    #     L = 5.8  # мм (длина пружины) 
+
+    #     # Вычисляем F по упрощенной формуле
+    #     # F = (x * d**4 * G * np.pi) / (8 * D**2 * L)
+    #     # return F
+    #     """
+    #     Расчет силы взаимодействия между магнитами по оси z. вариант с магнитом """
+    #     mu_0 = 4 * np.pi * 1e-7  # Магнитная проницаемость вакуума
+
+    #     term1 = (2 * (self.height + x)) / np.sqrt((self.height + x) ** 2 + self.square)
+    #     term2 = (2 * self.height + x) / np.sqrt(
+    #         (2 * self.height + x) ** 2 + self.square
+    #     )
+    #     term3 = x / np.sqrt(x ** 2 + self.square)
+
+    #     force = (
+    #         (np.pi * self.br ** 2 * self.square)
+    #         / (2 * mu_0)
+    #         * (term1 - term2 - term3)
+    #     )
+    #     return force
+        
     def magnetic_induction(self, z):
         """
         Расчет магнитной индукции в точке z по оси магнита.
@@ -127,35 +157,25 @@ class Coil:
 
         # Базовое положение катушки с учетом движения шейкера
         coil_base_position = self.coil_position(shaker, t)
-
+ 
         for turn in self.turns:
-            # Положение витки с учетом базового положения катушки
-            turn_position = coil_base_position + (turn['z_position'] - self.position)
+            # Расчёт позиции витка
+            z_turn = coil_base_position + (turn['z_position'] - self.position)
+            z_distance = magnet_position - z_turn
 
-            # Расстояние от магнита до витки
-            distance = magnet_position - turn_position
+            # Производная магнитной индукции по z
+            dB_dz = self.magnet.magnetic_induction_derivative(z_distance)
 
-            # Магнитная индукция в точке витки
-            B = self.magnet.magnetic_induction(distance)
+            # Площадь витка
+            area = math.pi * turn['radius'] ** 2
 
-            # Численная производная магнитной индукции по оси z
-            delta = 1e-6  # Малое приращение для численной дифференциации
-            B_plus = self.magnet.magnetic_induction(distance + delta)
-            # dB_dx = (B_plus - B) / delta
-            dB_dx = self.magnet.magnetic_induction_derivative(distance + delta)
+            # ЭДС
+            eds = -dB_dz * magnet_velocity * area
 
-            # Площадь витки (можно учитывать изменение площади для каждого слоя)
-            turn_area = math.pi * turn['radius'] ** 2
-
-            # Расчет ЭДС для витки
-            eds = -dB_dx * magnet_velocity * turn_area
-            
-
-            # Добавляем ЭДС витки в список
+            # Сбор результатов
             eds_per_turn.append(eds)
-
-            # Суммируем ЭДС
             total_eds += eds
+
 
         return eds_per_turn, total_eds
 
