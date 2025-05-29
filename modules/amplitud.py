@@ -35,6 +35,21 @@ def fir_bandpass_taps(order: int, low_hz: float, high_hz: float, fs: float):
 def parse_datetime(ts: str) -> float:
     return datetime.strptime(ts.strip(), "%Y-%m-%d %H:%M:%S.%f").timestamp()
 
+def estimate_amplitude_from_sine(a: np.ndarray, t: np.ndarray, freq_hz: float) -> float:
+    # Удаление DC-компоненты
+    a = a - np.mean(a)
+
+    # Извлечение амплитуды ускорения через RMS (корень из удвоенного среднего квадрата)
+    rms_a = np.sqrt(np.mean(a ** 2))
+    A_a = rms_a * np.sqrt(2)  # для чистого синуса
+
+    # Перевод в амплитуду смещения
+    omega = 2 * np.pi * freq_hz
+    A_s = A_a / (omega ** 2)
+
+    return A_s * 1000  # в мм
+
+
 # ────────────────────────────
 class AccelAmplitudeAnalyzer:
     def __init__(self,
@@ -73,7 +88,7 @@ class AccelAmplitudeAnalyzer:
                     t.append(parse_datetime(row[ti]))
                     a.append(float(row[ai].replace(",", ".")))
                 except Exception as e:
-                    print(f"⚠️  Ошибка чтения строки {row} в {file_path.name}: {e}")
+                    print(f"⚠️ Ошибка чтения строки {row} в {file_path.name}: {e}")
                     pass
         if len(a) < 10:
             print(f'A {a}')
@@ -115,7 +130,11 @@ class AccelAmplitudeAnalyzer:
         s = filtfilt(b_drift, a_drift, s)
         s = detrend(s, type='linear')
         # Расчёт амплитуды
-        amp_mm = np.max(np.abs(a)) * 1_000
+        # amp_mm = np.max(np.abs(s)) 
+        f_hz = find_first_int(file_path.stem)
+        amp_mm = estimate_amplitude_from_sine(a, t, f_hz)
+
+
         return amp_mm
 
 
@@ -141,7 +160,7 @@ class AccelAmplitudeAnalyzer:
 
         with open(self.save_dir / "amplitude_vs_frequency.csv", "w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["Frequency_Hz", "A"])
+            writer.writerow(["Frequency_Hz", "M"])
             writer.writerows(zip(labels, res))
         return labels, res
 
@@ -220,8 +239,8 @@ class AccelAmplitudeAnalyzer:
 # ────────────────────────────
 if __name__ == "__main__":
     analyzer = AccelAmplitudeAnalyzer(
-        csv_dir=r"D:\shaker\A3_DUBLE_MAGNETS_V2",
-        save_dir=r"D:\shaker\A3_DUBLE_MAGNETS_V2\_out",
+        csv_dir=r"D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp",
+        save_dir=r"D:\PROJECTs\leaves_detection\magnet\Magnet_clean\media",
         cutoff_hz=70.0,
         fs=1_000.0,
         order=512

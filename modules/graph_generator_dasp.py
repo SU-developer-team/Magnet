@@ -110,8 +110,8 @@ class CoilGraphGenerator:
 # Пример использования
 if __name__ == "__main__":
     generator = CoilGraphGenerator(
-        csv_dir=r'D:\shaker\A3_DUBLE_MAGNETS_V2',   # ← УКАЖИ ПУТЬ К ПАПКЕ С CSV
-        save_dir=r'D:\shaker\A3_DUBLE_MAGNETS_V2', # ← УКАЖИ ПАПКУ ДЛЯ ГРАФИКОВ
+        csv_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\1',  
+        save_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\media',
         smooth=False,         # ← ОТКЛЮЧИТЬ СГЛАЖИВАНИЕ
         divide=1_000               # ← Масштабировать на 1000
     )
