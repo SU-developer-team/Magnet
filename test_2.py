@@ -1,5 +1,6 @@
 from scipy import stats
 import numpy as np
+import pandas as pd 
 
 def get_student_t(df, confidence=0.95):
     t_table = {
@@ -45,8 +46,7 @@ for i in range(len(distances)):
     ci_upper = mean_force + margin
     results.append((distances[i], mean_force, ci_lower, ci_upper))
 
-import pandas as pd 
 df = pd.DataFrame(results, columns=["Дистанция (м)", "Средняя сила (Н)", "CI нижний", "CI верхний"]) 
 print(df.to_string(index=False))  
-df.to_csv("confidence_intervals.csv", index=False)
+df.to_csv("media/confidence_intervals.csv", index=False)
 print("Таблица сохранена в confidence_intervals.csv")

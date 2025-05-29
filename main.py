@@ -228,7 +228,7 @@ def plot_results(results: Dict[str, np.ndarray], coil: Coil,
     axes[3].set_xlabel("Время (с)"); axes[3].set_ylabel("Ток (А)"); axes[3].grid(True)
 
     fig.tight_layout()
-    out = save_dir / f"sim_{z_top}_{mu}.png"
+    out = save_dir / f"media/sim_{z_top}_{mu}.png"
     fig.savefig(out)
     plt.show()
 
@@ -246,7 +246,7 @@ def plot_emf(res: Dict[str, np.ndarray], *, z_top: float, mu: float, output: Pat
     ax.set_ylabel("EMF (V)")
     ax.legend(); ax.grid(True)
 
-    fig.tight_layout(); fig.savefig(Path(output) / f"emf_{z_top}_{mu}.png"); plt.show()
+    fig.tight_layout(); fig.savefig(Path(output) / f"media/emf_{z_top}_{mu}.png"); plt.show()
 
 
 ################################################################################
