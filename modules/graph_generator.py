@@ -109,7 +109,7 @@ class GraphGenerator:
 
         return s_values, q_values
 
-    def plot_summary_graph(self, s_values, q_values, output_image_name='summary_graph.png'):
+    def plot_summary_graph(self, s_values, q_values, output_image_name='summary_graph.png', title='График на основе формулы S=√(Σx^2/n) с исключением отсутствующих значений'):
         """
         Построение итогового графика на основе вычисленных значений S.
         Теперь добавляем равномерную шкалу по оси X и исключаем отсутствующие значения.
@@ -142,35 +142,95 @@ class GraphGenerator:
         # Построение графика с соединёнными точками
         plt.figure(figsize=(35, 10))
         plt.plot(filtered_q_values, filtered_s_values, color='blue', marker='o', linestyle='-', label='График', markersize=10)
-        plt.title('График на основе формулы S=√(Σx^2/n) с исключением отсутствующих значений')
+        plt.title(title)
         plt.xlabel('f')
         plt.ylabel('S')
         plt.grid(True)
         plt.legend()
-        plt.xticks(np.arange(0, max_q+10, 5))
+        plt.xticks(np.arange(0, 255, 5))
+        plt.yticks(np.arange(0, 0.2, 0.025))
         output_image_path = os.path.join(self.save_dir, output_image_name)
         plt.savefig(output_image_name)
 
         print(f"Итоговый график сохранён как {output_image_name}")
 
+    def plot_integrated_graph(self, s_values1, q_values1, s_values2, q_values2,
+                          output_image_name='integrated_graph.png', 
+                          title='Интегрированный график'):
+        """
+        Построение интегрированного графика на основе двух наборов значений S.
+        
+        :param s_values1: Список значений S для первого набора.
+        :param q_values1: Список q для первого набора.
+        :param s_values2: Список значений S для второго набора.
+        :param q_values2: Список q для второго набора.
+        :param output_image_name: Имя выходного файла графика.
+        :param title: Заголовок графика.
+        """
+        # Преобразуем q в числовые значения, если они строковые
+        q_values1 = [int(q) for q in q_values1]
+        q_values2 = [int(q) for q in q_values2]
+
+        min_q = min(q_values1 + q_values2)
+        max_q = max(q_values1 + q_values2)
+
+        plt.figure(figsize=(35, 10))
+        # Сортировка 1-го графика
+        combined1 = sorted(zip(q_values1, s_values1), key=lambda pair: pair[0])
+        q_values1_sorted, s_values1_sorted = zip(*combined1)
+
+        # Сортировка 2-го графика
+        combined2 = sorted(zip(q_values2, s_values2), key=lambda pair: pair[0])
+        q_values2_sorted, s_values2_sorted = zip(*combined2)
+
+        # Построение
+        plt.plot(q_values1_sorted, s_values1_sorted, color='blue', marker='o', linestyle='-', label='1mm', markersize=10)
+        plt.plot(q_values2_sorted, s_values2_sorted, color='red', marker='o', linestyle='-', label='2mm', markersize=10)
+
+        plt.title(title)
+        plt.xlabel('f')
+        plt.ylabel('S')
+        plt.yticks(np.arange(0, 0.2, 0.025))
+        plt.xticks(np.arange(0, 255, 5))
+        plt.grid(True)
+        plt.legend()
+        plt.xlim(min(min(q_values1), min(q_values2)), max(max(q_values1), max(q_values2)))
+
+        output_image_path = os.path.join(self.save_dir, output_image_name)
+        plt.savefig(output_image_path)
+
+        print(f"Интегрированный график сохранён как {output_image_path}")
+
  
 if __name__ == "__main__":
     # Создание графика для экспериментальных данных
-    generator = GraphGenerator(
+    # 1mm
+    generator_1mm = GraphGenerator(
         csv_dir='D:/PROJECTs/leaves_detection/magnet/Magnet_clean/exp_csv/a1', 
         save_dir='media/a1', 
         smooth=True,
         divide=1000)
-    s_values, q_values = generator.get_draw_data(draw=False)
-    generator.plot_summary_graph(s_values, q_values, output_image_name='1mm.png')
+    s_values_1mm, q_values_1mm = generator_1mm.get_draw_data(draw=False)
+    generator_1mm.plot_summary_graph(s_values_1mm, q_values_1mm, output_image_name='1mm.png', title='1mm')
 
-    generator = GraphGenerator(
+    # 2mm
+    generator_2mm = GraphGenerator(
         csv_dir='D:/PROJECTs/leaves_detection/magnet/Magnet_clean/exp_csv/a2', 
         save_dir='media/a2', 
         smooth=True,
         divide=1000)
-    s_values, q_values = generator.get_draw_data(draw=False)
-    generator.plot_summary_graph(s_values, q_values, output_image_name='2mm.png')
+    s_values_2mm, q_values_2mm = generator_2mm.get_draw_data(draw=False)
+    generator_2mm.plot_summary_graph(s_values_2mm, q_values_2mm, output_image_name='2mm.png', title='2mm')
+
+    # Объединённый график (используем один генератор для построения)
+    generator_2mm.plot_integrated_graph(
+        s_values1=s_values_1mm,
+        q_values1=q_values_1mm,
+        s_values2=s_values_2mm,
+        q_values2=q_values_2mm,
+        output_image_name='integrated_graph.png',
+        title='Интегрированный график'
+    )
 
     # # Создание графика для теоритических данных
     # generator = GraphGenerator(

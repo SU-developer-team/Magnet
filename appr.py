@@ -1,86 +1,102 @@
-import csv
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+import csv
 
-# Определение функции магнитного поля H(x)
-def magnetic_field(x, Br, b):
-    mu_0 = 4 * np.pi * 1e-7  # Магнитная проницаемость вакуума
-    R = 0.0195 / 2  # Радиус магнита в метрах (например, 9.75 мм)
-    L = 0.01  # Длина магнита в метрах (например, 10 мм)
-    
-    term1 = (x + L) / np.sqrt(R**2 + (x + L)**2)
-    term2 = x / np.sqrt(R**2 + x**2)
-    return (Br / (2 * mu_0)) * (term1 - term2) + b
+# Константы и параметры магнита
+mu_0 = 4 * np.pi * 1e-7
+R = 0.0195 / 2
+L = 0.01
 
-def plot_data_with_magnetic_field_approximation():
-    csv_file = 'data.csv'
-    h_values = []
-    avg_values = []
+# --- Формулы --- #
+def hyperbolla(x, Br, b): 
+    return Br / x + b
 
-    # Чтение данных из CSV
-    with open(csv_file, mode='r') as file:
+def exponential(x, Br, b):
+    return Br **5 * np.exp(-x / L)*1 + b
+
+def castaner(x, Br, b):
+    return (3 * np.pi * Br**2 * L**2 * R**4) / (2 * mu_0 * x**4 + 1e-12) + b
+
+def furlani(x, Br, b):
+    return (np.pi * Br**2 * R**4) / (4 * mu_0) * (
+        1 / (x**2 + 1e-12) +
+        1 / ((2 * L + x)**2 + 1e-12) -
+        2 / ((L + x)**2 + 1e-12)
+    ) + b
+
+def furlani_zurek(x, Br, b):
+    c = (4 * R) / 5
+    x_c = x + c
+    return (np.pi * Br**2 * R**4) / (4 * mu_0) * (
+        1 / (x_c**2 + 1e-12) +
+        1 / ((2 * L + x_c)**2 + 1e-12) -
+        2 / ((L + x_c)**2 + 1e-12)
+    ) + b
+
+def cheedket(x, Br, b):
+    term1 = 2 * (L + x) / np.sqrt((L + x)**2 + R**2)
+    term2 = (2 * L + x) / np.sqrt((2 * L + x)**2 + R**2)
+    term3 = x / np.sqrt(x**2 + R**2)
+    return (np.pi * Br**2 * R**2) / (2 * mu_0) * (term1 - term2 - term3) + b
+
+# --- Загрузка данных --- #
+
+def read_csv(filename):
+    h_values, avg_values = [], []
+    with open(filename, mode='r') as file:
         reader = csv.reader(file)
         for row in reader:
-            if len(row) != 4:
-                continue  # Пропуск строк с некорректными данными
-            h, m1, m2, m3 = map(float, row)
-            h /= 1000  # Преобразуем h в метры
-            m1 = (m1 - 32) / 1000  # Преобразуем массу в кг
-            m2 = (m2 - 32) / 1000
-            m3 = (m3 - 32) / 1000
-            avg = (m1 + m2 + m3) / 3
+            if len(row) != 6: continue
+            h, *masses = map(float, row)
+            h /= 1000
+            avg_mass = np.mean([m / 1000 for m in masses])
+            F = avg_mass * 9.81
             h_values.append(h)
-            avg_values.append(avg)
+            avg_values.append(F)
+    return np.array(h_values), np.array(avg_values)
 
-    # Преобразуем данные в numpy массивы
-    h_values = np.array(h_values)
-    avg_values = np.array(avg_values)
+# --- Обёртка подгонки и визуализации --- #
 
-    # Подгонка данных под функцию магнитного поля H(x) с границами для Br
-    initial_guess = [0.000011, 0.0]  # Начальные значения для Br и b
-    bounds = ([0.00001087, -np.inf], [0.000013, np.inf])  # Ограничения для Br и b
+def fit_and_plot(h, F, models, h1=None, F1=None):
+    h_plot = np.linspace(min(h), max(h), 500)
+    plt.figure(figsize=(12, 7))
+    plt.plot(h, F, 'ko', label="Эксперимент", color='red')
+    if h1 is not None and F1 is not None:
+        plt.plot(h1, F1, '--', label="Эксперимент 2", color='blue')
 
-    popt, pcov = curve_fit(magnetic_field, h_values, avg_values, p0=initial_guess, bounds=bounds)
-    Br, b = popt
-    print(f"Найденные значения: Br = {Br:.6f} Тл, b = {b:.6f}")
+    for name, model in models.items():
+        try:
+            popt, _ = curve_fit(model, h, F, p0=[1.2, 0.0], bounds=([0.0, -np.inf], [2.0, np.inf]))
+            F_fit = model(h_plot, *popt)
+            err = np.mean(np.abs((F - model(h, *popt)) / F)) * 100
+            print(f"{name:<25} | Br = {popt[0]:.4f}, b = {popt[1]:.4f}, ошибка = {err:.2f}%")
+            plt.plot(h_plot, F_fit, label=f"{name} ({err:.2f}%)")
+        except Exception as e:
+            print(f"{name} — ошибка подгонки: {e}")
 
-    # Генерация точек для аппроксимированной кривой
-    h_approx = np.linspace(min(h_values), max(h_values), 500)
-    avg_approx = magnetic_field(h_approx, Br, b)
-
-    # Вычисление средней относительной ошибки по ближайшим точкам
-    relative_errors = 0.0
-    for i in range(len(avg_values)):
-        # Находим индекс ближайшего значения в avg_approx к avg_values[i]
-        idx = np.argmin(np.abs(avg_approx - avg_values[i]))
-        closest_approx_value = avg_approx[idx]
-        
-        # Вычисляем относительную ошибку между avg_values[i] и closest_approx_value
-        rel_error = np.abs((avg_values[i] - closest_approx_value) / avg_values[i])
-        relative_errors += rel_error
-
-    # Вычисление средней относительной ошибки в процентах
-    relative_errors_percent = (relative_errors / len(avg_values)) * 100
-    print(f"Средняя относительная ошибка: {relative_errors_percent:.2f}%")
-
-    # Построение исходного графика
-    plt.plot(h_values, avg_values, 'o', label=f'Исходные данные. Средняя относительная ошибка {relative_errors_percent:.2f}%')
-
-    # Построение аппроксимированной кривой (магнитное поле)
-    plt.plot(h_approx, avg_approx, label=f'Аппроксимация магнитным полем (Br={Br:.4f} Тл, b={b:.4f})', color='red')
-
-    # Добавление заголовков и легенды
-    plt.title('Аппроксимация магнитным полем для среднего значения b от h')
-    plt.xlabel('Расстояние между магнитами (м)')
-    plt.ylabel('Средняя масса (кг)')
+    plt.xlabel("Расстояние (м)")
+    plt.ylabel("Сила (Н)")
+    plt.title("Сравнение моделей силы взаимодействия между магнитами")
     plt.legend()
     plt.grid(True)
+    plt.tight_layout()
     plt.show()
 
-def main():
-    plot_data_with_magnetic_field_approximation()
+# --- Главная функция --- #
 
-# Запуск основной функции
+def main():
+    h, F = read_csv('data_re.csv')
+    h1, F1 = read_csv('data_re1.csv')
+    models = {
+        # "Castañer": castaner,
+        # "Furlani": furlani,
+        # "Furlani + Zurek": furlani_zurek,
+        # "Гиперболла": hyperbolla,
+        # "Экспоненциальная": exponential,
+        # "Cheedket ": cheedket
+    }
+    fit_and_plot(h, F, models, h1, F1)
+
 if __name__ == "__main__":
     main()

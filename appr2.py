@@ -2,18 +2,22 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-
+import math
 # Определение функции силы F(x) по формуле Cheedket с дополнительным параметром b
 def force_cheedket(x, Br, b):
     mu_0 = 4 * np.pi * 1e-7  # Магнитная проницаемость вакуума
     R = 0.0195 / 2  # Радиус магнита в метрах (например, 9.75 мм)
     L = 0.01  # Длина магнита в метрах (например, 10 мм)
+     
+    c = (4 * R) / 5     # поправка по Zurek
+    x_c = x + c
+
+    term1 = 1 / (x_c ** 2)
+    term2 = 1 / ((2 * L + x_c) ** 2)
+    term3 = 2 / ((L + x_c) ** 2)
+
     
-    term1 = (2 * (L + x)) / np.sqrt((L + x)**2 + R**2)
-    term2 = (2 * L + x) / np.sqrt((2 * L + x)**2 + R**2)
-    term3 = x / np.sqrt(x**2 + R**2)
-    
-    force = (np.pi * Br**2 * R**2) / (2 * mu_0) * (term1 - term2 - term3) + b
+    force = (math.pi * Br ** 2 * R ** 4) / (4 * mu_0) * (term1 + term2 - term3) + b
     return force
 
 def plot_data_with_force_approximation():
@@ -27,7 +31,7 @@ def plot_data_with_force_approximation():
         for row in reader:
             if len(row) != 4:
                 continue  # Пропуск строк с некорректными данными
-            h, m1, m2, m3 = map(float, row)
+            h, m1, m2, m3, m4m  = map(float, row)
             h /= 1000  # Преобразуем h в метры
             m1 = (m1 - 32) / 1000  # Преобразуем массу в кг
             m2 = (m2 - 32) / 1000
