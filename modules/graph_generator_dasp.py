@@ -114,14 +114,14 @@ class CoilGraphGenerator:
 # Пример использования
 if __name__ == "__main__":
     generator = CoilGraphGenerator(
-        csv_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\1',  
-        save_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\1',
+        csv_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\exp_31_05_2025',  
+        save_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\exp_31_05_2025',
         smooth=False,       # ← ОТКЛЮЧИТЬ СГЛАЖИВАНИЕ
         divide=1_000        # ← Масштабировать на 1000
     )
     generator1 = CoilGraphGenerator(
-        csv_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\5',  
-        save_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\5',
+        csv_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\exp_24_05_2025',  
+        save_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\exp_24_05_2025',
         smooth=False,       # ← ОТКЛЮЧИТЬ СГЛАЖИВАНИЕ
         divide=1_000        # ← Масштабировать на 1000
     )
