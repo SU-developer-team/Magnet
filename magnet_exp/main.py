@@ -61,9 +61,9 @@ def read_csv(filename):
 def fit_and_plot(h, F, models, h1=None, F1=None):
     h_plot = np.linspace(min(h), max(h), 500)
     plt.figure(figsize=(12, 7))
-    plt.plot(h, F, 'ko', label="Эксперимент", color='red')
+    plt.plot(h, F, 'ko', label="Эксперимент 1", color='red')
     if h1 is not None and F1 is not None:
-        plt.plot(h1, F1, '--', label="Эксперимент 2", color='blue')
+        plt.plot(h1, F1, 'ko', label="Эксперимент 2", color='blue')
 
     for name, model in models.items():
         try:
@@ -86,12 +86,12 @@ def fit_and_plot(h, F, models, h1=None, F1=None):
 # --- Главная функция --- #
 
 def main():
-    h, F = read_csv('data_re.csv')
-    h1, F1 = read_csv('data_re1.csv')
+    h, F = read_csv('exp1.csv')
+    h1, F1 = read_csv('exp2.csv')
     models = {
         # "Castañer": castaner,
         # "Furlani": furlani,
-        # "Furlani + Zurek": furlani_zurek,
+        "Furlani + Zurek": furlani_zurek,
         # "Гиперболла": hyperbolla,
         # "Экспоненциальная": exponential,
         # "Cheedket ": cheedket

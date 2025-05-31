@@ -232,7 +232,7 @@ class AccelAmplitudeAnalyzer:
 # ────────────────────────────
 if __name__ == "__main__":
     analyzer = AccelAmplitudeAnalyzer(
-        csv_dir=r"D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\3",
+        csv_dir=r"D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\1",
         save_dir=r"D:\PROJECTs\leaves_detection\magnet\Magnet_clean\media",
         cutoff_hz=70.0,
         fs=1_000.0,

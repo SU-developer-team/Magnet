@@ -90,10 +90,14 @@ class CoilGraphGenerator:
 
         return s_values, q_values
 
-    def plot_summary_s_graph(self, s_values, q_values, output_name='summary_s.png'):
+    def plot_summary_s_graph(self, s_values, q_values, output_name='summary_s.png', s1_values=None, q1_values=None):
+            
         q_numeric = [int(q) for q in q_values]
         plt.figure(figsize=(20, 8))
         plt.plot(q_numeric, s_values, marker='o', linestyle='-', label='S')
+        if q1_values is not None and s1_values is not None:
+            q_numeric1 = [int(q) for q in q1_values]
+            plt.plot(q_numeric1, s1_values, marker='o', linestyle='-', color='green', label='S2')
         plt.title('S = √(Σ(Coil²)/n)')
         plt.xlabel('Frequency (Hz)')
         plt.ylabel('S')
@@ -110,10 +114,18 @@ class CoilGraphGenerator:
 # Пример использования
 if __name__ == "__main__":
     generator = CoilGraphGenerator(
-        csv_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\3',  
-        save_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\media',
+        csv_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\1',  
+        save_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\1',
+        smooth=False,       # ← ОТКЛЮЧИТЬ СГЛАЖИВАНИЕ
+        divide=1_000        # ← Масштабировать на 1000
+    )
+    generator1 = CoilGraphGenerator(
+        csv_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\5',  
+        save_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\5',
         smooth=False,       # ← ОТКЛЮЧИТЬ СГЛАЖИВАНИЕ
         divide=1_000        # ← Масштабировать на 1000
     )
     s_values, q_values = generator.generate_all_graphs(draw=False)
-    generator.plot_summary_s_graph(s_values, q_values, output_name='coil_summary_1.png')
+    s_values1, q_values1 = generator1.generate_all_graphs(draw=False)
+
+    generator.plot_summary_s_graph(s_values, q_values, output_name='coil_summary_1.png', s1_values=s_values1, q1_values=q_values1)

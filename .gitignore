@@ -1,1 +1,9 @@
 logs/*.log
+*.rar 
+*.zip
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar
+*.tar.lz
+*.tar.lzo   
