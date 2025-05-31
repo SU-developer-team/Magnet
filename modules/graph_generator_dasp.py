@@ -128,4 +128,10 @@ if __name__ == "__main__":
     s_values, q_values = generator.generate_all_graphs(draw=False)
     s_values1, q_values1 = generator1.generate_all_graphs(draw=False)
 
-    generator.plot_summary_s_graph(s_values, q_values, output_name='coil_summary_1.png', s1_values=s_values1, q1_values=q_values1)
+    generator.plot_summary_s_graph(
+        s_values,
+        q_values, 
+        output_name='coil_summary.png', 
+        # s1_values=s_values1, 
+        # q1_values=q_values1
+        )
