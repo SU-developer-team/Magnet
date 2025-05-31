@@ -110,10 +110,10 @@ class CoilGraphGenerator:
 # Пример использования
 if __name__ == "__main__":
     generator = CoilGraphGenerator(
-        csv_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\1',  
+        csv_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\exp\3',  
         save_dir=r'D:\PROJECTs\leaves_detection\magnet\Magnet_clean\media',
-        smooth=False,         # ← ОТКЛЮЧИТЬ СГЛАЖИВАНИЕ
-        divide=1_000               # ← Масштабировать на 1000
+        smooth=False,       # ← ОТКЛЮЧИТЬ СГЛАЖИВАНИЕ
+        divide=1_000        # ← Масштабировать на 1000
     )
     s_values, q_values = generator.generate_all_graphs(draw=False)
-    generator.plot_summary_s_graph(s_values, q_values, output_name='coil_summary.png')
+    generator.plot_summary_s_graph(s_values, q_values, output_name='coil_summary_1.png')
