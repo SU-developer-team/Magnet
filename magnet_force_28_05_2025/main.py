@@ -89,12 +89,12 @@ def main():
     h, F = read_csv('exp1.csv')
     h1, F1 = read_csv('exp2.csv')
     models = {
-        # "Castañer": castaner,
-        # "Furlani": furlani,
+        "Castañer": castaner,
+        "Furlani": furlani,
         "Furlani + Zurek": furlani_zurek,
         # "Гиперболла": hyperbolla,
         # "Экспоненциальная": exponential,
-        # "Cheedket ": cheedket
+        "Cheedket ": cheedket
     }
     fit_and_plot(h, F, models, h1, F1)
 
